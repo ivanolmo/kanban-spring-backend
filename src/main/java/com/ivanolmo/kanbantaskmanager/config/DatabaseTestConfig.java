@@ -1,4 +1,4 @@
-package com.ivanolmo.kanbantaskmanager;
+package com.ivanolmo.kanbantaskmanager.config;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
