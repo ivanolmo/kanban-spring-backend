@@ -1,10 +1,19 @@
 spring:
+  security:
+    user:
+      name: user
+      password: password
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:~/kanban-h2-db
     username: sa
     password:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
   h2:
     console:
       enabled: true
+logging:
+  level:
+    org.springframework.security: DEBUG
