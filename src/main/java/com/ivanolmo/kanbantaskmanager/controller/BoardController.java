@@ -1,8 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.exception.BoardNotFoundException;
-import com.ivanolmo.kanbantaskmanager.exception.UserNotFoundException;
+import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -32,14 +31,7 @@ public class BoardController {
       System.out.println("CSRF token from request attribute: " + csrfToken.getToken());
     }
 
-    if (userId <= 0) {
-      throw new UserNotFoundException("Invalid user id.");
-    }
-
     List<Board> boards = boardService.getAllUserBoards(userId);
-    if (boards.isEmpty()) {
-      throw new BoardNotFoundException("No boards found for this user.");
-    }
 
     logger.info("Successfully retrieved all boards for user with id: {}", userId);
     return new ResponseEntity<>(boards, HttpStatus.OK);
@@ -47,14 +39,7 @@ public class BoardController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getBoardById(@PathVariable Long id) {
-    if (id <= 0) {
-      throw new BoardNotFoundException("Invalid board ID.");
-    }
-
     Board board = boardService.getBoardById(id);
-    if (board == null) {
-      throw new BoardNotFoundException("Board not found.");
-    }
 
     logger.info("Successfully retrieved the board with id: {}", board.getId());
     return new ResponseEntity<>(board, HttpStatus.OK);
@@ -69,8 +54,8 @@ public class BoardController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateBoard(@Valid @RequestBody Board board, @PathVariable Long id) {
-    Board updatedBoard = boardService.updateBoard(id, board);
+  public ResponseEntity<?> updateBoardName(@Valid @RequestBody Board board, @PathVariable Long id) {
+    Board updatedBoard = boardService.updateBoardName(id, board);
 
     logger.info("Successfully updated the board with id: {}", updatedBoard.getId());
     return new ResponseEntity<>(updatedBoard, HttpStatus.OK);
@@ -78,9 +63,6 @@ public class BoardController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
-    if (id < 0) {
-      throw new BoardNotFoundException("Invalid board ID.");
-    }
     boardService.deleteBoard(id);
 
     logger.info("Successfully deleted the board with id: {}", id);
