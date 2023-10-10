@@ -29,6 +29,10 @@ public class Board {
   @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BoardColumn> boardColumns = new ArrayList<>();
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -36,7 +40,4 @@ public class Board {
   @LastModifiedDate
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
-
-  @Column(name = "user_id")
-  private Long userId;
 }
