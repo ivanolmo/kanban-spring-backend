@@ -1,8 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.exception;
 
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardAlreadyExistsException;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardUpdateException;
+import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +19,11 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(BoardCreationFailedException.class)
+  public ResponseEntity<String> handleBoardCreationFailedException(BoardCreationFailedException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(BoardUpdateException.class)
   public ResponseEntity<String> handleBoardUpdateException(BoardUpdateException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -29,6 +32,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BoardAlreadyExistsException.class)
   public ResponseEntity<String> handleBoardAlreadyExistsException(BoardAlreadyExistsException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(BoardDeleteException.class)
+  public ResponseEntity<String> handleBoardDeleteException(BoardDeleteException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(UserNotFoundException.class)
