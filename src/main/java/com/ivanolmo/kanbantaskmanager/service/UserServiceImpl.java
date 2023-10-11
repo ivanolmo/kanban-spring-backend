@@ -3,8 +3,9 @@ package com.ivanolmo.kanbantaskmanager.service;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
-
+@Service
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
 
