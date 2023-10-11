@@ -2,89 +2,148 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardAlreadyExistsException;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardCreationFailedException;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
+import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BoardServiceImpl implements BoardService {
   private final BoardRepository boardRepository;
   private final UserRepository userRepository;
+  private final BoardMapper boardMapper;
 
-  public BoardServiceImpl(BoardRepository boardRepository, UserRepository userRepository) {
+  public BoardServiceImpl(BoardRepository boardRepository, UserRepository userRepository,
+                          BoardMapper boardMapper) {
     this.boardRepository = boardRepository;
     this.userRepository = userRepository;
-  }
-
-  // create board
-  public Board createBoard(Board board) {
-    // check if board already exists
-    // this check won't work until user repo/service is implemented
-//    Board existingBoard = boardRepository.findBoardByBoardNameAndUserId(board.getBoardName(),
-//        board.getUser().getId());
-//    if (existingBoard != null) {
-//      throw new BoardAlreadyExistsException("A board with this name already exists.");
-//    }
-
-    try {
-      return boardRepository.save(board);
-    } catch (Exception e) {
-      throw new BoardCreationFailedException("Failed to create the board.");
-    }
+    this.boardMapper = boardMapper;
   }
 
   // get all boards for a user
-  public List<Board> getAllUserBoards(Long userId) {
+  @Transactional(readOnly = true)
+  public List<BoardDTO> getAllUserBoards(Long userId) {
+    // find user by id or else throw exception
     if (!userRepository.existsById(userId)) {
       throw new UserNotFoundException("User does not exist.");
     }
 
-    Optional<List<Board>> optionalBoards = boardRepository.findByUserId(userId);
+    // get users boards
+    List<Board> boards =
+        boardRepository.findByUserId(userId).orElseThrow(() -> new BoardNotFoundException("No " +
+            "boards found for this user."));
 
-    return optionalBoards.orElseThrow(() -> new BoardNotFoundException("No boards found for this " +
-        "user."));
+    // map boards to DTOs and return as list
+    return boards.stream()
+        .map(boardMapper::toDTO)
+        .collect(Collectors.toList());
   }
 
   // get board by id
-  public Board getBoardById(Long id) {
-    return boardRepository.findById(id).orElseThrow(() -> new BoardNotFoundException("Board not " +
-        "found."));
+  @Transactional(readOnly = true)
+  public BoardDTO getBoardById(Long id) {
+    // get board by id or else throw exception
+    Optional<Board> optBoard = boardRepository.findById(id);
+
+    if (optBoard.isEmpty()) {
+      throw new BoardNotFoundException("Board not found.");
+    }
+
+    // map board to DTO and return
+    return boardMapper.toDTO(optBoard.get());
+  }
+
+  @Transactional
+  public BoardDTO createBoard(BoardDTO boardDTO, Long userId) {
+    // check if board already exists
+    // get an Optional using a custom query and check if it is present
+    Optional<Board> existingBoardOpt =
+        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getBoardName(),
+            userId);
+
+    // if present, i.e., the board exists, throw error
+    if (existingBoardOpt.isPresent()) {
+      throw new BoardAlreadyExistsException("A board with this name already exists.");
+    }
+
+    User user =
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not " +
+            "found."));
+
+    try {
+      Board board = boardMapper.toEntity(boardDTO);
+      board.setUser(user);
+      board = boardRepository.save(board);
+      return boardMapper.toDTO(board);
+    } catch (Exception e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new BoardCreationFailedException("Failed to create the board.", e);
+    }
   }
 
   // update board
-  public Board updateBoardName(Long id, Board boardDetails) {
+  @Transactional
+  public BoardDTO updateBoardName(Long id, BoardDTO boardDetailsDTO) {
     // get board by id or else throw exception
-    Board board = getBoardById(id);
+    Optional<Board> optBoard = boardRepository.findById(id);
+
+    if (optBoard.isEmpty()) {
+      throw new BoardNotFoundException("Board not found.");
+    }
+
+    Board board = optBoard.get();
 
     // get user
-    Long userId = board.getUser().getId();
+    Long userId = Optional.ofNullable(board.getUser())
+        .map(User::getId)
+        .orElseThrow(() -> new UserNotFoundException("User not found for this board."));
 
     // check if the new name is the same as any existing board name for this user
     // if match is found throw exception
-    if (boardRepository.existsByBoardNameAndUserIdAndIdNot(boardDetails.getBoardName(),
+    if (boardRepository.existsByBoardNameAndUserIdAndIdNot(boardDetailsDTO.getBoardName(),
         userId, id)) {
       throw new BoardAlreadyExistsException("A board with that name already exists.");
     }
 
-    // perform update
-    board.setBoardName(boardDetails.getBoardName());
-    return boardRepository.save(board);
+    try {
+      // perform update and return
+      board.setBoardName(boardDetailsDTO.getBoardName());
+      Board updatedBoard = boardRepository.save(board);
+      return boardMapper.toDTO(updatedBoard);
+    } catch (Exception e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new BoardUpdateException("There was an error updating this board.", e);
+    }
   }
 
   // delete board
-  public void deleteBoard(Long id) {
+  @Transactional
+  public BoardDTO deleteBoard(Long id) {
     // get board by id or else throw exception
-    Board board = getBoardById(id);
+    Optional<Board> optBoard = boardRepository.findById(id);
 
-    // perform delete
-    boardRepository.delete(board);
+    if (optBoard.isEmpty()) {
+      throw new BoardNotFoundException("Board not found.");
+    }
+
+    try {
+      // capture the board to be deleted, delete, and return
+      Board board = optBoard.get();
+      boardRepository.delete(board);
+      return boardMapper.toDTO(board);
+    } catch (Exception e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new BoardDeleteException("There was an error deleting this board.", e);
+    }
   }
 }
