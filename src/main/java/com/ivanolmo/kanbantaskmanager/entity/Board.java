@@ -22,7 +22,7 @@ public class Board {
   private Long id;
 
   @NotBlank(message = "Board name cannot be blank")
-  @Size(min = 3, max = 30, message = "Board name should be between 3 and 30 characters")
+  @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
   @Column(nullable = false)
   private String boardName;
 
@@ -40,4 +40,9 @@ public class Board {
   @LastModifiedDate
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @Override
+  public String toString() {
+    return "Board [id=" + id + ", boardName=" + boardName + "]";
+  }
 }
