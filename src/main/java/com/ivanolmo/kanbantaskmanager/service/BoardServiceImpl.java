@@ -23,7 +23,8 @@ public class BoardServiceImpl implements BoardService {
   private final UserRepository userRepository;
   private final BoardMapper boardMapper;
 
-  public BoardServiceImpl(BoardRepository boardRepository, UserRepository userRepository,
+  public BoardServiceImpl(BoardRepository boardRepository,
+                          UserRepository userRepository,
                           BoardMapper boardMapper) {
     this.boardRepository = boardRepository;
     this.userRepository = userRepository;
@@ -66,23 +67,24 @@ public class BoardServiceImpl implements BoardService {
   @Transactional
   public BoardDTO createBoard(BoardDTO boardDTO, Long userId) {
     // check if board already exists
-    // get an Optional using a custom query and check if it is present
+    // get an Optional using a custom query and check if it is present. if present, throw error
     Optional<Board> existingBoardOpt =
         boardRepository.findBoardByBoardNameAndUserId(boardDTO.getBoardName(),
             userId);
-
-    // if present, i.e., the board exists, throw error
     if (existingBoardOpt.isPresent()) {
       throw new BoardAlreadyExistsException("A board with this name already exists.");
     }
 
+    // get the user from the repository
     User user =
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not " +
             "found."));
 
+    // convert the BoardDTO to a Board entity and set user
+    Board board = boardMapper.toEntity(boardDTO);
+    board.setUser(user);
+
     try {
-      Board board = boardMapper.toEntity(boardDTO);
-      board.setUser(user);
       board = boardRepository.save(board);
       return boardMapper.toDTO(board);
     } catch (Exception e) {

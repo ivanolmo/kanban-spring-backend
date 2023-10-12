@@ -1,7 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequest;
-import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +41,7 @@ public class BoardController {
   public ResponseEntity<BoardDTO> getBoardById(@PathVariable Long id) {
     BoardDTO board = boardService.getBoardById(id);
 
-    log.info("Successfully retrieved the board with id: {}", board.getId());
+    log.info("Successfully retrieved the board with id: {}", id);
     return new ResponseEntity<>(board, HttpStatus.OK);
   }
 
@@ -59,7 +58,7 @@ public class BoardController {
                                             @PathVariable Long id) {
     BoardDTO updatedBoardDTO = boardService.updateBoardName(id, boardDTO);
 
-    log.info("Successfully updated the board with id: {}", updatedBoardDTO.getId());
+    log.info("Successfully updated the board with id: {}", id);
     return new ResponseEntity<>(updatedBoardDTO, HttpStatus.OK);
   }
 
