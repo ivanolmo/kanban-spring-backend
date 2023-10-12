@@ -4,11 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardDTO {
   private Long id;
   private String boardName;
-  private UserDTO user;
+  private List<ColumnDTO> columns;
 }
