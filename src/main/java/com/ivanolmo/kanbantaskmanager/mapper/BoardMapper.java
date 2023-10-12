@@ -1,38 +1,39 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.entity.BoardColumn;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class BoardMapper {
   public BoardDTO toDTO(Board board) {
+    if (board == null) {
+      return null;
+    }
+
     List<ColumnDTO> columns = board.getBoardColumns().stream()
         .map(boardColumn -> new ColumnDTO(boardColumn.getColumnName()))
         .toList();
-    return new BoardDTO(board.getId(), board.getBoardName(), columns);
+
+    return BoardDTO.builder()
+        .id(board.getId())
+        .boardName(board.getBoardName())
+        .columns(columns)
+        .build();
   }
 
   public Board toEntity(BoardDTO boardDTO) {
-    Board board = new Board();
+    if (boardDTO == null) {
+      return null;
+    }
 
-    board.setId(boardDTO.getId());
-    board.setBoardName(boardDTO.getBoardName());
-    List<BoardColumn> columns = boardDTO.getColumns().stream()
-        .map(columnDTO -> {
-          BoardColumn column = new BoardColumn();
-          column.setColumnName(columnDTO.getColumnName());
-          column.setBoard(board);
-          return column;
-        })
-        .toList();
-    board.setBoardColumns(columns);
-
-    return board;
+    return new Board.Builder()
+        .id(boardDTO.getId())
+        .boardName(boardDTO.getBoardName())
+        .columns(boardDTO.getColumns())
+        .build();
   }
 }
