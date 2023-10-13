@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -61,17 +61,17 @@ public class Board {
       return this;
     }
 
-    public Builder columns(List<ColumnDTO> columnDTOs) {
-      List<BoardColumn> columns = columnDTOs.stream()
-          .map(columnDTO -> {
-            BoardColumn column = new BoardColumn();
-            column.setColumnName(columnDTO.getColumnName());
-            column.setBoard(board);
-            return column;
+    public Builder boardColumns(List<BoardColumnDTO> boardColumnDTOs) {
+      List<BoardColumn> boardColumns = boardColumnDTOs.stream()
+          .map(boardColumnDTO -> {
+            BoardColumn boardColumn = new BoardColumn();
+            boardColumn.setColumnName(boardColumnDTO.getColumnName());
+            boardColumn.setBoard(board);
+            return boardColumn;
           })
           .toList();
 
-      board.setBoardColumns(columns);
+      board.setBoardColumns(boardColumns);
       return this;
     }
 

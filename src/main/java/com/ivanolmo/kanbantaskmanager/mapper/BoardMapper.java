@@ -2,7 +2,7 @@ package com.ivanolmo.kanbantaskmanager.mapper;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,14 +14,16 @@ public class BoardMapper {
       return null;
     }
 
-    List<ColumnDTO> columns = board.getBoardColumns().stream()
-        .map(boardColumn -> new ColumnDTO(boardColumn.getColumnName()))
+    List<BoardColumnDTO> boardColumns = board.getBoardColumns().stream()
+        .map(boardColumn -> new BoardColumnDTO(
+            boardColumn.getId(),
+            boardColumn.getColumnName()))
         .toList();
 
     return BoardDTO.builder()
         .id(board.getId())
         .boardName(board.getBoardName())
-        .columns(columns)
+        .columns(boardColumns)
         .build();
   }
 
@@ -33,7 +35,7 @@ public class BoardMapper {
     return new Board.Builder()
         .id(boardDTO.getId())
         .boardName(boardDTO.getBoardName())
-        .columns(boardDTO.getColumns())
+        .boardColumns(boardDTO.getColumns())
         .build();
   }
 }

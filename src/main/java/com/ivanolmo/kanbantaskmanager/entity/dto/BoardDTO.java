@@ -14,5 +14,5 @@ import java.util.List;
 public class BoardDTO {
   private Long id;
   private String boardName;
-  private List<ColumnDTO> columns;
+  private List<BoardColumnDTO> columns;
 }
