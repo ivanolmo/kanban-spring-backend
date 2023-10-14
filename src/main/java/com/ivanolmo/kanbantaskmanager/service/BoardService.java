@@ -10,6 +10,6 @@ public interface BoardService {
   List<BoardDTO> getAllUserBoards(Long userId);
   List<BoardColumnDTO> getAllColumnsForBoard(Long boardId);
   BoardDTO getBoardById(Long id);
-  BoardDTO updateBoardName(Long id, BoardDTO boardDetails);
+  BoardDTO updateBoardName(Long id, BoardDTO boardDTO);
   BoardDTO deleteBoard(Long id);
 }

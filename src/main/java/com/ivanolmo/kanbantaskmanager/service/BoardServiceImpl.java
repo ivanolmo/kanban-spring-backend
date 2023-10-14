@@ -110,6 +110,7 @@ public class BoardServiceImpl implements BoardService {
     Board board = boardMapper.toEntity(boardDTO);
     board.setUser(user);
 
+    // perform creation and return dto
     try {
       board = boardRepository.save(board);
       return boardMapper.toDTO(board);
@@ -121,15 +122,16 @@ public class BoardServiceImpl implements BoardService {
 
   // update board
   @Transactional
-  public BoardDTO updateBoardName(Long id, BoardDTO boardDetailsDTO) {
+  public BoardDTO updateBoardName(Long id, BoardDTO boardDTO) {
     // get board by id or else throw exception
-    Optional<Board> optBoard = boardRepository.findById(id);
+    Optional<Board> optBoardToUpdate = boardRepository.findById(id);
 
-    if (optBoard.isEmpty()) {
+    if (optBoardToUpdate.isEmpty()) {
       throw new BoardNotFoundException("Board not found.");
     }
 
-    Board board = optBoard.get();
+    // get board from opt
+    Board board = optBoardToUpdate.get();
 
     // get user
     Long userId = Optional.ofNullable(board.getUser())
@@ -138,14 +140,16 @@ public class BoardServiceImpl implements BoardService {
 
     // check if the new name is the same as any existing board name for this user
     // if match is found throw exception
-    if (boardRepository.existsByBoardNameAndUserIdAndIdNot(boardDetailsDTO.getBoardName(),
-        userId, id)) {
+    Optional<Board> existingBoardName =
+        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getBoardName(), userId);
+
+    if (existingBoardName.isPresent()) {
       throw new BoardAlreadyExistsException("A board with that name already exists.");
     }
 
     try {
       // perform update and return
-      board.setBoardName(boardDetailsDTO.getBoardName());
+      board.setBoardName(boardDTO.getBoardName());
       Board updatedBoard = boardRepository.save(board);
       return boardMapper.toDTO(updatedBoard);
     } catch (Exception e) {

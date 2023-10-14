@@ -62,14 +62,14 @@ public class BoardColumnServiceImpl implements BoardColumnService {
   @Transactional
   public BoardColumnDTO updateBoardColumnName(Long id, BoardColumnDTO boardColumnDTO) {
     // get column by id or else throw exception
-    Optional<BoardColumn> optColumn = boardColumnRepository.findById(id);
+    Optional<BoardColumn> optColumnToUpdate = boardColumnRepository.findById(id);
 
-    if (optColumn.isEmpty()) {
+    if (optColumnToUpdate.isEmpty()) {
       throw new ColumnNotFoundException("Column not found.");
     }
 
     // get column from opt
-    BoardColumn boardColumn = optColumn.get();
+    BoardColumn boardColumn = optColumnToUpdate.get();
 
     // get board that this column belongs to
     Long boardId = Optional.ofNullable(boardColumn.getBoard())
@@ -78,10 +78,10 @@ public class BoardColumnServiceImpl implements BoardColumnService {
 
     // check if the new column name is the same as any existing column name for this board
     // if match is found throw exception
-    Optional<BoardColumn> existingBoardColumnOpt =
+    Optional<BoardColumn> existingColumnName =
         boardColumnRepository.findBoardColumnByColumnNameAndBoardId(boardColumnDTO.getColumnName(), boardId);
 
-    if (existingBoardColumnOpt.isPresent()) {
+    if (existingColumnName.isPresent()) {
       throw new ColumnAlreadyExistsException("A column with that name already exists.");
     }
 
