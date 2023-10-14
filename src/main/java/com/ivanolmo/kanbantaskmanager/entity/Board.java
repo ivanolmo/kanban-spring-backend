@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -44,5 +45,38 @@ public class Board {
   @Override
   public String toString() {
     return "Board [id=" + id + ", boardName=" + boardName + "]";
+  }
+
+  // custom Builder class for dto -> entity conversion
+  public static class Builder {
+    private final Board board = new Board();
+
+    public Builder id(Long id) {
+      board.setId(id);
+      return this;
+    }
+
+    public Builder boardName(String boardName) {
+      board.setBoardName(boardName);
+      return this;
+    }
+
+    public Builder boardColumns(List<BoardColumnDTO> boardColumnDTOs) {
+      List<BoardColumn> boardColumns = boardColumnDTOs.stream()
+          .map(boardColumnDTO -> {
+            BoardColumn boardColumn = new BoardColumn();
+            boardColumn.setColumnName(boardColumnDTO.getColumnName());
+            boardColumn.setBoard(board);
+            return boardColumn;
+          })
+          .toList();
+
+      board.setBoardColumns(boardColumns);
+      return this;
+    }
+
+    public Board build() {
+      return board;
+    }
   }
 }

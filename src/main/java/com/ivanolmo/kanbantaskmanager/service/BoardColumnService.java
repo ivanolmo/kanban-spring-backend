@@ -1,13 +1,11 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.BoardColumn;
-
-import java.util.List;
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 
 public interface BoardColumnService {
-  BoardColumn createBoardColumn(BoardColumn boardColumn);
-  List<BoardColumn> getAllUserBoardColumns(Long userId);
+  BoardColumnDTO addColumnToBoard(BoardColumnDTO boardColumnDTO, Long boardId);
   BoardColumn getBoardColumnById(Long id);
-  BoardColumn updateBoardColumn(Long id, BoardColumn boardColumnDetails);
-  void deleteBoardColumn(Long id);
+  BoardColumnDTO updateBoardColumnName(Long id, BoardColumnDTO boardColumnDTO);
+  BoardColumnDTO deleteBoardColumn(Long id);
 }

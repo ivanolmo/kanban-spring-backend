@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequest;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
@@ -43,6 +44,14 @@ public class BoardController {
 
     log.info("Successfully retrieved the board with id: {}", id);
     return new ResponseEntity<>(board, HttpStatus.OK);
+  }
+
+  @GetMapping("/{id}/columns")
+  public ResponseEntity<List<BoardColumnDTO>> getAllColumnsForBoard(@PathVariable Long id) {
+    List<BoardColumnDTO> columns = boardService.getAllColumnsForBoard(id);
+
+    log.info("Successfully retrieved all columns for board with id: {}", id);
+    return new ResponseEntity<>(columns, HttpStatus.OK);
   }
 
   @PostMapping

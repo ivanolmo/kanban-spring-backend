@@ -1,6 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,6 +20,8 @@ public class BoardColumn {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @NotBlank(message = "Column name cannot be blank")
+  @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")
   @Column(name = "column_name")
   private String columnName;
 
@@ -35,4 +39,23 @@ public class BoardColumn {
   @LastModifiedDate
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  // custom Builder class for dto -> entity conversion
+  public static class Builder {
+    private final BoardColumn boardColumn = new BoardColumn();
+
+    public Builder id(Long id) {
+      boardColumn.setId(id);
+      return this;
+    }
+
+    public Builder boardColumnName(String boardColumnName) {
+      boardColumn.setColumnName(boardColumnName);
+      return this;
+    }
+
+    public BoardColumn build() {
+      return boardColumn;
+    }
+  }
 }
