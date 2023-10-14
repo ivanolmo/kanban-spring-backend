@@ -1,6 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.exception;
 
 import com.ivanolmo.kanbantaskmanager.exception.board.*;
+import com.ivanolmo.kanbantaskmanager.exception.column.ColumnCreationFailedException;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(ColumnCreationFailedException.class)
+  public ResponseEntity<String> handleColumnCreationFailedException(ColumnCreationFailedException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

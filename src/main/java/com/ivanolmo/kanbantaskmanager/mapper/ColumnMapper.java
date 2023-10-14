@@ -17,11 +17,14 @@ public class ColumnMapper {
         .build();
   }
 
-//  public BoardColumn toEntity(ColumnDTO columnDTO) {
-//    if (columnDTO == null) {
-//      return null;
-//    }
-//
-//    return new BoardColumn(columnDTO.getColumnName());
-//  }
+  public BoardColumn toEntity(BoardColumnDTO boardColumnDTO) {
+    if (boardColumnDTO == null) {
+      return null;
+    }
+
+    return new BoardColumn.Builder()
+        .id(boardColumnDTO.getId())
+        .boardColumnName(boardColumnDTO.getColumnName())
+        .build();
+  }
 }
