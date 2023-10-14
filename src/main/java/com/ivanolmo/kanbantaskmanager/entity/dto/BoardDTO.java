@@ -13,6 +13,6 @@ import java.util.List;
 @Builder
 public class BoardDTO {
   private Long id;
-  private String boardName;
+  private String name;
   private List<ColumnDTO> columns;
 }

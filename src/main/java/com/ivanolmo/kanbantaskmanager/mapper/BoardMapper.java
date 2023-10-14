@@ -22,7 +22,7 @@ public class BoardMapper {
 
     return BoardDTO.builder()
         .id(board.getId())
-        .boardName(board.getBoardName())
+        .name(board.getName())
         .columns(columns)
         .build();
   }
@@ -34,7 +34,7 @@ public class BoardMapper {
 
     return new Board.Builder()
         .id(boardDTO.getId())
-        .boardName(boardDTO.getBoardName())
+        .name(boardDTO.getName())
         .columns(boardDTO.getColumns())
         .build();
   }

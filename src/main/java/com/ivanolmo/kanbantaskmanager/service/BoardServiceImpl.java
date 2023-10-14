@@ -95,7 +95,7 @@ public class BoardServiceImpl implements BoardService {
     // check if board already exists
     // get an Optional using a custom query and check if it is present. if present, throw error
     Optional<Board> existingBoardOpt =
-        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getBoardName(),
+        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getName(),
             userId);
     if (existingBoardOpt.isPresent()) {
       throw new BoardAlreadyExistsException("A board with this name already exists.");
@@ -141,7 +141,7 @@ public class BoardServiceImpl implements BoardService {
     // check if the new name is the same as any existing board name for this user
     // if match is found throw exception
     Optional<Board> existingBoardName =
-        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getBoardName(), userId);
+        boardRepository.findBoardByBoardNameAndUserId(boardDTO.getName(), userId);
 
     if (existingBoardName.isPresent()) {
       throw new BoardAlreadyExistsException("A board with that name already exists.");
@@ -149,7 +149,7 @@ public class BoardServiceImpl implements BoardService {
 
     try {
       // perform update and return
-      board.setBoardName(boardDTO.getBoardName());
+      board.setName(boardDTO.getName());
       Board updatedBoard = boardRepository.save(board);
       return boardMapper.toDTO(updatedBoard);
     } catch (Exception e) {

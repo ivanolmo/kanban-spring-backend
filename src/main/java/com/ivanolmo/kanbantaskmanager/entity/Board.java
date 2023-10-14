@@ -25,7 +25,7 @@ public class Board {
   @NotBlank(message = "Board name cannot be blank")
   @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
   @jakarta.persistence.Column(nullable = false)
-  private String boardName;
+  private String name;
 
   @CreatedDate
   @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
@@ -44,7 +44,7 @@ public class Board {
 
   @Override
   public String toString() {
-    return "Board [id=" + id + ", boardName=" + boardName + "]";
+    return "Board [id=" + id + ", name=" + name + "]";
   }
 
   // custom Builder class for dto -> entity conversion
@@ -56,8 +56,8 @@ public class Board {
       return this;
     }
 
-    public Builder boardName(String boardName) {
-      board.setBoardName(boardName);
+    public Builder name(String name) {
+      board.setName(name);
       return this;
     }
 
