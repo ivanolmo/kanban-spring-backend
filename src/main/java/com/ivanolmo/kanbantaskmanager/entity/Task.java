@@ -19,27 +19,27 @@ public class Task {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "title", nullable = false)
+  @jakarta.persistence.Column(nullable = false)
   private String title;
 
-  @Column(name = "description", nullable = false)
+  @jakarta.persistence.Column(nullable = false)
   private String description;
 
-  @Column(name = "completed", nullable = false)
+  @jakarta.persistence.Column(nullable = false)
   private Boolean completed = false;
 
-  @ManyToOne
-  @JoinColumn(name = "board_column_id")
-  private BoardColumn boardColumn;
-
-  @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Subtask> subtasks = new ArrayList<>();
-
   @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @LastModifiedDate
-  @Column(name = "updated_at")
+  @jakarta.persistence.Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @ManyToOne
+  @JoinColumn(name = "column_id", nullable = false)
+  private Column column;
+
+  @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Subtask> subtasks = new ArrayList<>();
 }

@@ -21,24 +21,24 @@ public class User {
 
   private String name;
 
-  @Column(unique = true)
+  @jakarta.persistence.Column(unique = true)
   private String email;
 
-  @Column(name = "email_verified")
+  @jakarta.persistence.Column(name = "email_verified")
   private LocalDateTime emailVerified;
 
   private String image;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Board> boards = new ArrayList<>();
-
   @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @LastModifiedDate
-  @Column(name = "updated_at")
+  @jakarta.persistence.Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Board> boards = new ArrayList<>();
 
   // spring security
   private String password;

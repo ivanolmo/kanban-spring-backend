@@ -19,12 +19,12 @@ public class TaskServiceImpl implements TaskService {
     return taskRepository.save(task);
   }
 
-  // get all tasks for a user
-  public List<Task> getAllUserTasks(Long userId) {
-    return taskRepository.findByBoardColumnBoardUserId(userId);
+  // get all tasks for a column
+  public List<Task> getAllColumnTasks(Long columnId) {
+    return taskRepository.findAllByColumnId(columnId);
   }
 
-  // udpate task by id
+  // update task by id
   public Task getTaskById(Long id) {
     return taskRepository.findById(id).orElse(null);
   }

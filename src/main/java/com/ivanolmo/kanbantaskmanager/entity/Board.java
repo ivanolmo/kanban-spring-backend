@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -24,23 +24,23 @@ public class Board {
 
   @NotBlank(message = "Board name cannot be blank")
   @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
-  @Column(nullable = false)
+  @jakarta.persistence.Column(nullable = false)
   private String boardName;
 
+  @CreatedDate
+  @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @LastModifiedDate
+  @jakarta.persistence.Column(name = "updated_at")
+  private LocalDateTime updatedAt;
+
   @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<BoardColumn> boardColumns = new ArrayList<>();
+  private List<Column> columns = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private LocalDateTime updatedAt;
 
   @Override
   public String toString() {
@@ -61,17 +61,17 @@ public class Board {
       return this;
     }
 
-    public Builder boardColumns(List<BoardColumnDTO> boardColumnDTOs) {
-      List<BoardColumn> boardColumns = boardColumnDTOs.stream()
-          .map(boardColumnDTO -> {
-            BoardColumn boardColumn = new BoardColumn();
-            boardColumn.setColumnName(boardColumnDTO.getColumnName());
-            boardColumn.setBoard(board);
-            return boardColumn;
+    public Builder columns(List<ColumnDTO> columnDTOs) {
+      List<Column> columns = columnDTOs.stream()
+          .map(columnDTO -> {
+            Column column = new Column();
+            column.setName(columnDTO.getName());
+            column.setBoard(board);
+            return column;
           })
           .toList();
 
-      board.setBoardColumns(boardColumns);
+      board.setColumns(columns);
       return this;
     }
 

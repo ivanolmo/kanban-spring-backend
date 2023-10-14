@@ -1,16 +1,16 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.entity.BoardColumn;
+import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
-import com.ivanolmo.kanbantaskmanager.repository.BoardColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
+import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,18 +24,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BoardServiceImpl implements BoardService {
   private final BoardRepository boardRepository;
-  private final BoardColumnRepository boardColumnRepository;
+  private final ColumnRepository columnRepository;
   private final UserRepository userRepository;
   private final BoardMapper boardMapper;
   private final ColumnMapper columnMapper;
 
   public BoardServiceImpl(BoardRepository boardRepository,
-                          BoardColumnRepository boardColumnRepository,
+                          ColumnRepository columnRepository,
                           UserRepository userRepository,
                           BoardMapper boardMapper,
                           ColumnMapper columnMapper) {
     this.boardRepository = boardRepository;
-    this.boardColumnRepository = boardColumnRepository;
+    this.columnRepository = columnRepository;
     this.userRepository = userRepository;
     this.boardMapper = boardMapper;
     this.columnMapper = columnMapper;
@@ -75,17 +75,17 @@ public class BoardServiceImpl implements BoardService {
   }
 
   @Transactional(readOnly = true)
-  public List<BoardColumnDTO> getAllColumnsForBoard(Long boardId) {
+  public List<ColumnDTO> getAllColumnsForBoard(Long boardId) {
     // find board by id or else throw exception
     if (!boardRepository.existsById(boardId)) {
       throw new BoardNotFoundException("Board not found.");
     }
 
     // get board columns
-    List<BoardColumn> boardColumns = boardColumnRepository.findAllColumnsByBoardId(boardId);
+    List<Column> columns = columnRepository.findAllColumnsByBoardId(boardId);
 
     // map columns to DTOs and return as list
-    return boardColumns.stream()
+    return columns.stream()
         .map(columnMapper::toDTO)
         .collect(Collectors.toList());
   }

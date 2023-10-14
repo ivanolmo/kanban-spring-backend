@@ -1,8 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequest;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ public class BoardController {
 
   @GetMapping
   public ResponseEntity<List<BoardDTO>> getAllUserBoards(@RequestParam Long userId,
-                                             HttpServletRequest request) {
+                                                         HttpServletRequest request) {
     CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
     if (csrfToken != null) {
       System.out.println("CSRF token from request attribute: " + csrfToken.getToken());
@@ -47,8 +47,8 @@ public class BoardController {
   }
 
   @GetMapping("/{id}/columns")
-  public ResponseEntity<List<BoardColumnDTO>> getAllColumnsForBoard(@PathVariable Long id) {
-    List<BoardColumnDTO> columns = boardService.getAllColumnsForBoard(id);
+  public ResponseEntity<List<ColumnDTO>> getAllColumnsForBoard(@PathVariable Long id) {
+    List<ColumnDTO> columns = boardService.getAllColumnsForBoard(id);
 
     log.info("Successfully retrieved all columns for board with id: {}", id);
     return new ResponseEntity<>(columns, HttpStatus.OK);
@@ -64,7 +64,7 @@ public class BoardController {
 
   @PutMapping("/{id}")
   public ResponseEntity<BoardDTO> updateBoardName(@Valid @RequestBody BoardDTO boardDTO,
-                                            @PathVariable Long id) {
+                                                  @PathVariable Long id) {
     BoardDTO updatedBoardDTO = boardService.updateBoardName(id, boardDTO);
 
     log.info("Successfully updated the board with id: {}", id);

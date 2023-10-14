@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface SubtaskService {
   Subtask createSubtask(Subtask subtask);
-  List<Subtask> getAllUserSubtasks(Long userId);
+  List<Subtask> getAllTaskSubtasks(Long taskId);
   Subtask getSubtaskById(Long id);
   Subtask updateSubtask(Long id, Subtask subtaskDetails);
   void deleteSubtask(Long id);

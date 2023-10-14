@@ -1,30 +1,30 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
-import com.ivanolmo.kanbantaskmanager.entity.BoardColumn;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardColumnDTO;
+import com.ivanolmo.kanbantaskmanager.entity.Column;
+import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ColumnMapper {
-  public BoardColumnDTO toDTO(BoardColumn boardColumn) {
-    if (boardColumn == null) {
+  public ColumnDTO toDTO(Column column) {
+    if (column == null) {
       return null;
     }
 
-    return BoardColumnDTO.builder()
-        .id(boardColumn.getId())
-        .columnName(boardColumn.getColumnName())
+    return ColumnDTO.builder()
+        .id(column.getId())
+        .name(column.getName())
         .build();
   }
 
-  public BoardColumn toEntity(BoardColumnDTO boardColumnDTO) {
-    if (boardColumnDTO == null) {
+  public Column toEntity(ColumnDTO columnDTO) {
+    if (columnDTO == null) {
       return null;
     }
 
-    return new BoardColumn.Builder()
-        .id(boardColumnDTO.getId())
-        .boardColumnName(boardColumnDTO.getColumnName())
+    return new Column.Builder()
+        .id(columnDTO.getId())
+        .name(columnDTO.getName())
         .build();
   }
 }

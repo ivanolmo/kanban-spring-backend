@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardColumnDTO {
+public class ColumnDTO {
   private Long id;
-  private String columnName;
+  private String name;
 }

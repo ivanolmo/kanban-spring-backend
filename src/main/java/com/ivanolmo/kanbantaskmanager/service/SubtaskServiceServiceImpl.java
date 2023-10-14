@@ -19,9 +19,9 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
     return subtaskRepository.save(subtask);
   }
 
-  // get all subtasks for a user
-  public List<Subtask> getAllUserSubtasks(Long userId) {
-    return subtaskRepository.findByTaskBoardColumnBoardUserId(userId);
+  // get all subtasks for a task
+  public List<Subtask> getAllTaskSubtasks(Long taskId) {
+    return subtaskRepository.findAllByTaskId(taskId);
   }
 
   // get subtask by id

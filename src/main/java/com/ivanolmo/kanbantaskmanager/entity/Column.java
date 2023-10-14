@@ -13,49 +13,49 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "board_columns")
+@Table(name = "columns")
 @EntityListeners(AuditingEntityListener.class)
-public class BoardColumn {
+public class Column {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @NotBlank(message = "Column name cannot be blank")
   @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")
-  @Column(name = "column_name")
-  private String columnName;
-
-  @ManyToOne
-  @JoinColumn(name = "board_id")
-  private Board board;
-
-  @OneToMany(mappedBy = "boardColumn")
-  private List<Task> tasks;
+  @jakarta.persistence.Column
+  private String name;
 
   @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @LastModifiedDate
-  @Column(name = "updated_at")
+  @jakarta.persistence.Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @ManyToOne
+  @JoinColumn(name = "board_id", nullable = false)
+  private Board board;
+
+  @OneToMany(mappedBy = "column")
+  private List<Task> tasks;
 
   // custom Builder class for dto -> entity conversion
   public static class Builder {
-    private final BoardColumn boardColumn = new BoardColumn();
+    private final Column column = new Column();
 
     public Builder id(Long id) {
-      boardColumn.setId(id);
+      column.setId(id);
       return this;
     }
 
-    public Builder boardColumnName(String boardColumnName) {
-      boardColumn.setColumnName(boardColumnName);
+    public Builder name(String name) {
+      column.setName(name);
       return this;
     }
 
-    public BoardColumn build() {
-      return boardColumn;
+    public Column build() {
+      return column;
     }
   }
 }

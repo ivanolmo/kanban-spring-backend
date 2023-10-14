@@ -17,21 +17,21 @@ public class Subtask {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "title", nullable = false)
+  @jakarta.persistence.Column(name = "title", nullable = false)
   private String title;
 
-  @Column(name = "completed", nullable = false)
+  @jakarta.persistence.Column(name = "completed", nullable = false)
   private Boolean completed = false;
 
-  @ManyToOne
-  @JoinColumn(name = "task_id")
-  private Task task;
-
   @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @LastModifiedDate
-  @Column(name = "updated_at")
+  @jakarta.persistence.Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @ManyToOne
+  @JoinColumn(name = "task_id", nullable = false)
+  private Task task;
 }
