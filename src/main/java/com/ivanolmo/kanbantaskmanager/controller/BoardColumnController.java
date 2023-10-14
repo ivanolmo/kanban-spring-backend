@@ -27,4 +27,21 @@ public class BoardColumnController {
     log.info("Successfully added a new column to board with id: {}", request.getBoardId());
     return new ResponseEntity<>(newBoardColumnDTO, HttpStatus.CREATED);
   }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<BoardColumnDTO> updateColumnName(@Valid @RequestBody BoardColumnDTO boardColumnDTO,
+                                                         @PathVariable Long id) {
+    BoardColumnDTO updatedBoardColumnDTO = boardColumnService.updateBoardColumnName(id, boardColumnDTO);
+
+    log.info("Successfully updated the column with id: {}", id);
+    return new ResponseEntity<>(updatedBoardColumnDTO, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<BoardColumnDTO> deleteColumn(@PathVariable Long id) {
+    BoardColumnDTO deletedColumn = boardColumnService.deleteBoardColumn(id);
+
+    log.info("Successfully deleted the column with id: {}", id);
+    return new ResponseEntity<>(deletedColumn, HttpStatus.NO_CONTENT);
+  }
 }

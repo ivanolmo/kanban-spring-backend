@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.exception;
 
 import com.ivanolmo.kanbantaskmanager.exception.board.*;
-import com.ivanolmo.kanbantaskmanager.exception.column.ColumnCreationFailedException;
+import com.ivanolmo.kanbantaskmanager.exception.column.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
   @ExceptionHandler(BoardNotFoundException.class)
   public ResponseEntity<String> handleBoardNotFoundException(BoardNotFoundException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -40,13 +45,28 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
-    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  @ExceptionHandler(ColumnNotFoundException.class)
+  public ResponseEntity<String> handleColumnNotFoundException(ColumnNotFoundException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(ColumnCreationFailedException.class)
   public ResponseEntity<String> handleColumnCreationFailedException(ColumnCreationFailedException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ColumnUpdateException.class)
+  public ResponseEntity<String> handleColumnUpdateException(ColumnUpdateException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ColumnAlreadyExistsException.class)
+  public ResponseEntity<String> handleColumnAlreadyExistsException(ColumnAlreadyExistsException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(ColumnDeleteException.class)
+  public ResponseEntity<String> handleColumnDeleteException(ColumnDeleteException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
