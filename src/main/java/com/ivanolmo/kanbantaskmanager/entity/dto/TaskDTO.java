@@ -5,14 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ColumnDTO {
+public class TaskDTO {
   private Long id;
-  private String name;
-  private List<TaskDTO> tasks;
+  private String title;
+  private String description;
 }

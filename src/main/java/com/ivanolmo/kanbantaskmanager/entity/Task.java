@@ -25,9 +25,6 @@ public class Task {
   @jakarta.persistence.Column(nullable = false)
   private String description;
 
-  @jakarta.persistence.Column(nullable = false)
-  private Boolean completed = false;
-
   @CreatedDate
   @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
