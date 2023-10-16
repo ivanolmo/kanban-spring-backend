@@ -71,7 +71,7 @@ public class TaskServiceImpl implements TaskService {
     Long columnId = task.getColumn().getId();
 
     // check incoming dto for a title
-    // this check is in place to prevent issues when a user only wants to update description
+    // this check is in place to prevent issues when a user only wants to update one task value
     if (taskDTO.getTitle() != null) {
       // check if the new task title is the same as any existing task title for this column
       Optional<Task> existingTaskTitle =

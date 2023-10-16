@@ -1,13 +1,11 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
-import com.ivanolmo.kanbantaskmanager.entity.Subtask;
-
-import java.util.List;
+import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
 
 public interface SubtaskService {
-  Subtask createSubtask(Subtask subtask);
-  List<Subtask> getAllTaskSubtasks(Long taskId);
-  Subtask getSubtaskById(Long id);
-  Subtask updateSubtask(Long id, Subtask subtaskDetails);
-  void deleteSubtask(Long id);
+  SubtaskDTO addSubtaskToTask(Long taskId, SubtaskDTO subtaskDTO);
+
+  SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDetails);
+
+  SubtaskDTO deleteSubtask(Long id);
 }

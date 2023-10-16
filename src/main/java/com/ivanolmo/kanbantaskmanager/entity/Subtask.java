@@ -34,4 +34,27 @@ public class Subtask {
   @ManyToOne
   @JoinColumn(name = "task_id", nullable = false)
   private Task task;
+
+  public static class Builder {
+    private final Subtask subtask = new Subtask();
+
+    public Builder id(Long id) {
+      subtask.setId(id);
+      return this;
+    }
+
+    public Builder title(String title) {
+      subtask.setTitle(title);
+      return this;
+    }
+
+    public Builder completed(Boolean completed) {
+      subtask.setCompleted(completed);
+      return this;
+    }
+
+    public Subtask build() {
+      return subtask;
+    }
+  }
 }
