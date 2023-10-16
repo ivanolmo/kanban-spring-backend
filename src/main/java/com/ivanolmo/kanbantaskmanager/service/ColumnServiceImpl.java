@@ -73,7 +73,7 @@ public class ColumnServiceImpl implements ColumnService {
     // check if the new column name is the same as any existing column name for this board
     // if match is found throw exception
     Optional<Column> existingColumnName =
-        columnRepository.findColumnByNameAndBoardId(columnDTO.getName(),
+        columnRepository.findByNameAndBoardId(columnDTO.getName(),
             boardId);
 
     if (existingColumnName.isPresent()) {

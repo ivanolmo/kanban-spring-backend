@@ -75,7 +75,7 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
     if (subtaskDTO.getTitle() != null) {
       // check if the new subtask title is the same as any existing subtask title for this task
       Optional<Subtask> existingSubtaskTitle =
-          subtaskRepository.findSubtaskByTitleAndTaskIAndId(subtask.getTitle(), taskId);
+          subtaskRepository.findByTitleAndTaskIAndId(subtask.getTitle(), taskId);
 
       // if  match is found throw exception
       if (existingSubtaskTitle.isPresent()) {

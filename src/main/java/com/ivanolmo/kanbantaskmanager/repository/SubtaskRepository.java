@@ -10,6 +10,6 @@ import java.util.Optional;
 
 public interface SubtaskRepository extends JpaRepository<Subtask, Long> {
   @Query("SELECT s FROM Subtask s WHERE LOWER(s.title) = LOWER(:title) AND s.task.id = :taskId")
-  Optional<Subtask> findSubtaskByTitleAndTaskIAndId(@Param("title") String title,
+  Optional<Subtask> findByTitleAndTaskIAndId(@Param("title") String title,
                                                     @Param("taskId") Long taskId);
 }

@@ -75,7 +75,7 @@ public class TaskServiceImpl implements TaskService {
     if (taskDTO.getTitle() != null) {
       // check if the new task title is the same as any existing task title for this column
       Optional<Task> existingTaskTitle =
-          taskRepository.findTaskByTitleAndColumnId(taskDTO.getTitle(), columnId);
+          taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId);
 
       // if match is found throw exception
       if (existingTaskTitle.isPresent()) {

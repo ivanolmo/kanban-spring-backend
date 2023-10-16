@@ -10,6 +10,6 @@ import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query("SELECT t FROM Task t WHERE LOWER(t.title) = LOWER(:title) AND t.column.id = :columnId")
-  Optional<Task> findTaskByTitleAndColumnId(@Param("title") String title,
+  Optional<Task> findByTitleAndColumnId(@Param("title") String title,
                                             @Param("columnId") Long columnId);
 }
