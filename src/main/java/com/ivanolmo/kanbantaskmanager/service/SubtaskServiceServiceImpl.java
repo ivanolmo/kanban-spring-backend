@@ -32,13 +32,13 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
   @Transactional
   public SubtaskDTO addSubtaskToTask(Long taskId, SubtaskDTO subtaskDTO) {
     // get task, throw error if not found
-    Optional<Task> optTask = taskRepository.findById(taskId);
-    if (optTask.isEmpty()) {
+    Optional<Task> taskOptional = taskRepository.findById(taskId);
+    if (taskOptional.isEmpty()) {
       throw new TaskNotFoundException("Task not found.");
     }
 
     // get task from optional, convert the SubtaskDTO to a Subtask entity and set to task
-    Task task = optTask.get();
+    Task task = taskOptional.get();
     Subtask subtask = subtaskMapper.toEntity(subtaskDTO);
     subtask.setTask(task);
 
@@ -57,15 +57,15 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
   @Transactional
   public SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDTO) {
     // get subtask by id
-    Optional<Subtask> optSubtaskToUpdate = subtaskRepository.findById(id);
+    Optional<Subtask> subtaskToUpdateOptional = subtaskRepository.findById(id);
 
     // throw exception if subtask is not found
-    if (optSubtaskToUpdate.isEmpty()) {
+    if (subtaskToUpdateOptional.isEmpty()) {
       throw new RuntimeException("Subtask not found.");
     }
 
     // get subtask from opt
-    Subtask subtask = optSubtaskToUpdate.get();
+    Subtask subtask = subtaskToUpdateOptional.get();
 
     // get task that this subtask belongs to
     Long taskId = subtask.getTask().getId();
@@ -74,11 +74,11 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
     // this check is in place to prevent issues when a user only wants to update one subtask value
     if (subtaskDTO.getTitle() != null) {
       // check if the new subtask title is the same as any existing subtask title for this task
-      Optional<Subtask> existingSubtaskTitle =
+      Optional<Subtask> existingSubtaskTitleOptional =
           subtaskRepository.findByTitleAndTaskIAndId(subtask.getTitle(), taskId);
 
       // if  match is found throw exception
-      if (existingSubtaskTitle.isPresent()) {
+      if (existingSubtaskTitleOptional.isPresent()) {
         // TODO custom
         throw new RuntimeException("A subtask with that title already exists.");
       }
@@ -108,18 +108,17 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
   @Transactional
   public void deleteSubtask(Long id) {
     // get subtask by id
-    Optional<Subtask> optSubtaskToDelete = subtaskRepository.findById(id);
+    Optional<Subtask> subtaskOptional = subtaskRepository.findById(id);
 
     // throw exception if subtask is not found
-    if (optSubtaskToDelete.isEmpty()) {
+    if (subtaskOptional.isEmpty()) {
       // TODO custom
       throw new RuntimeException("Subtask not found.");
     }
 
     // capture the subtask to be deleted and delete
     try {
-      Subtask subtask = optSubtaskToDelete.get();
-      subtaskRepository.delete(subtask);
+      subtaskRepository.delete(subtaskOptional.get());
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       // TODO custom

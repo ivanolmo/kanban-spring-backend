@@ -64,14 +64,14 @@ public class BoardServiceImpl implements BoardService {
   @Transactional(readOnly = true)
   public BoardDTO getBoardById(Long id) {
     // get board by id or else throw exception
-    Optional<Board> optBoard = boardRepository.findById(id);
+    Optional<Board> boardOptional = boardRepository.findById(id);
 
-    if (optBoard.isEmpty()) {
+    if (boardOptional.isEmpty()) {
       throw new BoardNotFoundException("Board not found.");
     }
 
     // map board to DTO and return
-    return boardMapper.toDTO(optBoard.get());
+    return boardMapper.toDTO(boardOptional.get());
   }
 
   @Transactional(readOnly = true)
@@ -94,10 +94,10 @@ public class BoardServiceImpl implements BoardService {
   public BoardDTO createBoard(BoardDTO boardDTO, Long userId) {
     // check if board already exists
     // get an Optional using a custom query and check if it is present. if present, throw error
-    Optional<Board> existingBoardOpt =
+    Optional<Board> existingBoardOptional =
         boardRepository.findByBoardNameAndUserId(boardDTO.getName(),
             userId);
-    if (existingBoardOpt.isPresent()) {
+    if (existingBoardOptional.isPresent()) {
       throw new BoardAlreadyExistsException("A board with this name already exists.");
     }
 
@@ -124,24 +124,24 @@ public class BoardServiceImpl implements BoardService {
   @Transactional
   public BoardDTO updateBoardName(Long id, BoardDTO boardDTO) {
     // get board by id or else throw exception
-    Optional<Board> optBoardToUpdate = boardRepository.findById(id);
+    Optional<Board> boardToUpdateOptional = boardRepository.findById(id);
 
-    if (optBoardToUpdate.isEmpty()) {
+    if (boardToUpdateOptional.isEmpty()) {
       throw new BoardNotFoundException("Board not found.");
     }
 
     // get board from opt
-    Board board = optBoardToUpdate.get();
+    Board board = boardToUpdateOptional.get();
 
     // get user that this board belongs to
     Long userId = board.getUser().getId();
 
     // check if the new name is the same as any existing board name for this user
     // if match is found throw exception
-    Optional<Board> existingBoardName =
+    Optional<Board> existingBoardNameOptional =
         boardRepository.findByBoardNameAndUserId(boardDTO.getName(), userId);
 
-    if (existingBoardName.isPresent()) {
+    if (existingBoardNameOptional.isPresent()) {
       throw new BoardAlreadyExistsException("A board with that name already exists.");
     }
 
@@ -160,16 +160,13 @@ public class BoardServiceImpl implements BoardService {
   @Transactional
   public void deleteBoard(Long id) {
     // get board by id or else throw exception
-    Optional<Board> optBoard = boardRepository.findById(id);
-
-    if (optBoard.isEmpty()) {
+    Optional<Board> boardOptional = boardRepository.findById(id);
+    if (boardOptional.isEmpty()) {
       throw new BoardNotFoundException("Board not found.");
     }
 
     try {
-      // capture the board to be deleted and delete
-      Board board = optBoard.get();
-      boardRepository.delete(board);
+      boardRepository.delete(boardOptional.get());
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new BoardDeleteException("There was an error deleting this board.", e);

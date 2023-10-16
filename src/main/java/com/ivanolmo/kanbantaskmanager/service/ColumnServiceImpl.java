@@ -33,13 +33,13 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
-    Optional<Board> boardOpt = boardRepository.findById(boardId);
-    if (boardOpt.isEmpty()) {
+    Optional<Board> boardOptional = boardRepository.findById(boardId);
+    if (boardOptional.isEmpty()) {
       throw new BoardNotFoundException("Board not found.");
     }
 
     // get column from optional, convert the ColumnDTO to a Column entity and set to board
-    Board board = boardOpt.get();
+    Board board = boardOptional.get();
     Column column = columnMapper.toEntity(columnDTO);
     column.setBoard(board);
 
@@ -56,25 +56,25 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO) {
     // get column by id or else throw exception
-    Optional<Column> optColumnToUpdate = columnRepository.findById(id);
+    Optional<Column> columnToUpdateOptional = columnRepository.findById(id);
 
-    if (optColumnToUpdate.isEmpty()) {
+    if (columnToUpdateOptional.isEmpty()) {
       throw new ColumnNotFoundException("Column not found.");
     }
 
     // get column from opt
-    Column column = optColumnToUpdate.get();
+    Column column = columnToUpdateOptional.get();
 
     // get board that this column belongs to
     Long boardId = column.getBoard().getId();
 
     // check if the new column name is the same as any existing column name for this board
     // if match is found throw exception
-    Optional<Column> existingColumnName =
+    Optional<Column> existingColumnNameOptional =
         columnRepository.findByNameAndBoardId(columnDTO.getName(),
             boardId);
 
-    if (existingColumnName.isPresent()) {
+    if (existingColumnNameOptional.isPresent()) {
       throw new ColumnAlreadyExistsException("A column with that name already exists.");
     }
 
@@ -93,16 +93,14 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public void deleteColumn(Long id) {
     // get column by id or else throw exception
-    Optional<Column> optColumn = columnRepository.findById(id);
-
-    if (optColumn.isEmpty()) {
+    Optional<Column> columnOptional = columnRepository.findById(id);
+    if (columnOptional.isEmpty()) {
       throw new ColumnNotFoundException("Column not found.");
     }
 
     // capture the column to be deleted and delete
     try {
-      Column column = optColumn.get();
-      columnRepository.delete(column);
+      columnRepository.delete(columnOptional.get());
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new ColumnDeleteException("There was an error deleting this column.", e);
