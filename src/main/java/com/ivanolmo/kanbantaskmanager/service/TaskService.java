@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface TaskService {
   TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO);
-  TaskDTO updateTask(Long id, TaskDTO taskDetails);
+  TaskDTO updateTask(Long id, TaskDTO taskDTO);
   TaskDTO deleteTask(Long id);
 }

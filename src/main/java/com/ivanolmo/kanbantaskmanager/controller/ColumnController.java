@@ -21,8 +21,7 @@ public class ColumnController {
 
   @PostMapping
   public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequest request) {
-    ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getColumn(),
-        request.getBoardId());
+    ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getBoardId(), request.getColumn());
 
     log.info("Successfully added a new column to board with id: {}", request.getBoardId());
     return new ResponseEntity<>(newColumnDTO, HttpStatus.CREATED);

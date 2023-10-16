@@ -31,7 +31,7 @@ public class ColumnServiceImpl implements ColumnService {
 
   // create board column
   @Transactional
-  public ColumnDTO addColumnToBoard(ColumnDTO columnDTO, Long boardId) {
+  public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
     Optional<Board> boardOpt = boardRepository.findById(boardId);
     if (boardOpt.isEmpty()) {
