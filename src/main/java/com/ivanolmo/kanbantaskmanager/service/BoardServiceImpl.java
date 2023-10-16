@@ -109,7 +109,7 @@ public class BoardServiceImpl implements BoardService {
       return boardMapper.toDTO(board);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      throw new BoardCreationFailedException("Failed to create the board.", e);
+      throw new BoardCreationException("Failed to create the board.", e);
     }
   }
 

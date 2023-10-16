@@ -44,7 +44,7 @@ public class ColumnServiceImpl implements ColumnService {
       return columnMapper.toDTO(column);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnCreationFailedException("Failed to create the column.", e);
+      throw new ColumnCreationException("Failed to create the column.", e);
     }
   }
 
