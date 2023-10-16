@@ -1,4 +1,4 @@
-package com.ivanolmo.kanbantaskmanager.entity.dto;
+package com.ivanolmo.kanbantaskmanager.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

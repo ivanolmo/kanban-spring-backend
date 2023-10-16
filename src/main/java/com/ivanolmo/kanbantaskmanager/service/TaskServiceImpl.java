@@ -2,17 +2,16 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.exception.column.ColumnNotFoundException;
 import com.ivanolmo.kanbantaskmanager.exception.task.*;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -33,13 +32,10 @@ public class TaskServiceImpl implements TaskService {
   @Transactional
   public TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO) {
     // get column, throw error if not found
-    Optional<Column> columnOpt = columnRepository.findById(columnId);
-    if (columnOpt.isEmpty()) {
-      throw new ColumnNotFoundException("Column not found.");
-    }
+    Column column = columnRepository.findById(columnId)
+        .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
 
-    // get column from optional, convert the TaskDTO to a Task entity and set to column
-    Column column = columnOpt.get();
+    // convert the TaskDTO to a Task entity and set to column
     Task task = taskMapper.toEntity(taskDTO);
     task.setColumn(column);
 
@@ -56,16 +52,9 @@ public class TaskServiceImpl implements TaskService {
   // update task
   @Transactional
   public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
-    // get task by id
-    Optional<Task> optTaskToUpdate = taskRepository.findById(id);
-
-    // throw exception if task is not found
-    if (optTaskToUpdate.isEmpty()) {
-      throw new TaskNotFoundException("Task not found.");
-    }
-
-    // get task from opt
-    Task task = optTaskToUpdate.get();
+    // get task by id or else throw exception
+    Task task = taskRepository.findById(id)
+        .orElseThrow(() -> new TaskNotFoundException("Task not found."));
 
     // get column that this task belongs to
     Long columnId = task.getColumn().getId();
@@ -74,13 +63,11 @@ public class TaskServiceImpl implements TaskService {
     // this check is in place to prevent issues when a user only wants to update one task value
     if (taskDTO.getTitle() != null) {
       // check if the new task title is the same as any existing task title for this column
-      Optional<Task> existingTaskTitle =
-          taskRepository.findTaskByTitleAndColumnId(taskDTO.getTitle(), columnId);
-
       // if match is found throw exception
-      if (existingTaskTitle.isPresent()) {
-        throw new TaskDataAlreadyExistsException("A task with that title already exists.");
-      }
+      taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
+          .ifPresent(existingTask -> {
+            throw new TaskDataAlreadyExistsException("A task with that title already exists.");
+          });
 
       // update the title
       task.setTitle(taskDTO.getTitle());
@@ -104,20 +91,13 @@ public class TaskServiceImpl implements TaskService {
 
   // delete task
   @Transactional
-  public TaskDTO deleteTask(Long id) {
-    // get task by id
-    Optional<Task> optTaskToDelete = taskRepository.findById(id);
-
-    // throw exception if task is not found
-    if (optTaskToDelete.isEmpty()) {
-      throw new TaskNotFoundException("Task not found.");
-    }
-
-    // capture the task to be deleted, delete, and return dto
+  public void deleteTask(Long id) {
+    // delete task or throw error if task not found
     try {
-      Task task = optTaskToDelete.get();
-      taskRepository.delete(task);
-      return taskMapper.toDTO(task);
+      taskRepository.deleteById(id);
+    } catch (EmptyResultDataAccessException e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new TaskNotFoundException("Task not found.");
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new TaskDeleteException("There was an error deleting this task.", e);

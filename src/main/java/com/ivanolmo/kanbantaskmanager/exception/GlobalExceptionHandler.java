@@ -4,6 +4,7 @@ import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.column.*;
 import com.ivanolmo.kanbantaskmanager.exception.task.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
@@ -26,8 +28,8 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
   }
 
-  @ExceptionHandler(BoardCreationFailedException.class)
-  public ResponseEntity<String> handleBoardCreationFailedException(BoardCreationFailedException e) {
+  @ExceptionHandler(BoardCreationException.class)
+  public ResponseEntity<String> handleBoardCreationException(BoardCreationException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
@@ -51,8 +53,8 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(ColumnCreationFailedException.class)
-  public ResponseEntity<String> handleColumnCreationFailedException(ColumnCreationFailedException e) {
+  @ExceptionHandler(ColumnCreationException.class)
+  public ResponseEntity<String> handleColumnCreationException(ColumnCreationException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
@@ -108,6 +110,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleAllExceptions(Exception e) {
-    return new ResponseEntity<>("An internal error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+    log.error("An error occurred: {}", e.getMessage(), e);
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

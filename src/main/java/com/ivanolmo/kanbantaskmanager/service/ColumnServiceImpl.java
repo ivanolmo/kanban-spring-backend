@@ -1,18 +1,17 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
 import com.ivanolmo.kanbantaskmanager.exception.column.*;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -31,15 +30,12 @@ public class ColumnServiceImpl implements ColumnService {
 
   // create board column
   @Transactional
-  public ColumnDTO addColumnToBoard(ColumnDTO columnDTO, Long boardId) {
+  public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
-    Optional<Board> boardOpt = boardRepository.findById(boardId);
-    if (boardOpt.isEmpty()) {
-      throw new BoardNotFoundException("Board not found.");
-    }
+    Board board = boardRepository.findById(boardId)
+        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
 
-    // get column from optional, convert the ColumnDTO to a Column entity and set to board
-    Board board = boardOpt.get();
+    // convert the ColumnDTO to a Column entity and set to board
     Column column = columnMapper.toEntity(columnDTO);
     column.setBoard(board);
 
@@ -48,7 +44,7 @@ public class ColumnServiceImpl implements ColumnService {
       return columnMapper.toDTO(column);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnCreationFailedException("Failed to create the column.", e);
+      throw new ColumnCreationException("Failed to create the column.", e);
     }
   }
 
@@ -56,29 +52,17 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO) {
     // get column by id or else throw exception
-    Optional<Column> optColumnToUpdate = columnRepository.findById(id);
-
-    if (optColumnToUpdate.isEmpty()) {
-      throw new ColumnNotFoundException("Column not found.");
-    }
-
-    // get column from opt
-    Column column = optColumnToUpdate.get();
+    Column column = columnRepository.findById(id)
+        .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
 
     // get board that this column belongs to
-    Long boardId = Optional.ofNullable(column.getBoard())
-        .map(Board::getId)
-        .orElseThrow(() -> new BoardNotFoundException("Board not found for this column."));
+    Long boardId = column.getBoard().getId();
 
-    // check if the new column name is the same as any existing column name for this board
-    // if match is found throw exception
-    Optional<Column> existingColumnName =
-        columnRepository.findColumnByNameAndBoardId(columnDTO.getName(),
-            boardId);
-
-    if (existingColumnName.isPresent()) {
-      throw new ColumnAlreadyExistsException("A column with that name already exists.");
-    }
+    // if column name already exists for this board, throw error
+    columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
+        .ifPresent(existingColumn -> {
+          throw new ColumnAlreadyExistsException("A column with that name already exists.");
+        });
 
     // perform update and return dto
     try {
@@ -93,19 +77,13 @@ public class ColumnServiceImpl implements ColumnService {
 
   // delete column
   @Transactional
-  public ColumnDTO deleteColumn(Long id) {
-    // get column by id or else throw exception
-    Optional<Column> optColumn = columnRepository.findById(id);
-
-    if (optColumn.isEmpty()) {
-      throw new ColumnNotFoundException("Column not found.");
-    }
-
-    // capture the column to be deleted, delete, and return
+  public void deleteColumn(Long id) {
+    // delete column or throw error if column not found
     try {
-      Column column = optColumn.get();
-      columnRepository.delete(column);
-      return columnMapper.toDTO(column);
+      columnRepository.deleteById(id);
+    } catch (EmptyResultDataAccessException e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new ColumnNotFoundException("Column not found.");
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new ColumnDeleteException("There was an error deleting this column.", e);

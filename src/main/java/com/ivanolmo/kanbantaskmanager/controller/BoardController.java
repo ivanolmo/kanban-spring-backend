@@ -1,8 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequest;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -55,8 +55,8 @@ public class BoardController {
   }
 
   @PostMapping
-  public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody BoardCreationRequest request) {
-    BoardDTO newBoardDTO = boardService.createBoard(request.getBoard(), request.getUserId());
+  public ResponseEntity<BoardDTO> addBoardToUser(@Valid @RequestBody BoardCreationRequestDTO request) {
+    BoardDTO newBoardDTO = boardService.addBoardToUser(request.getUserId(), request.getBoard());
 
     log.info("Successfully created a new board with id: {}", newBoardDTO.getId());
     return new ResponseEntity<>(newBoardDTO, HttpStatus.CREATED);
@@ -72,10 +72,10 @@ public class BoardController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<BoardDTO> deleteBoard(@PathVariable Long id) {
-    BoardDTO deletedBoard = boardService.deleteBoard(id);
+  public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
+    boardService.deleteBoard(id);
 
     log.info("Successfully deleted the board with id: {}", id);
-    return new ResponseEntity<>(deletedBoard, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;

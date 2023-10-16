@@ -1,4 +1,4 @@
-package com.ivanolmo.kanbantaskmanager.entity.dto;
+package com.ivanolmo.kanbantaskmanager.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

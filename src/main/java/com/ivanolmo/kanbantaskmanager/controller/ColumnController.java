@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnCreationRequest;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.ColumnService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +20,8 @@ public class ColumnController {
   }
 
   @PostMapping
-  public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequest request) {
-    ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getColumn(),
-        request.getBoardId());
+  public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequestDTO request) {
+    ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getBoardId(), request.getColumn());
 
     log.info("Successfully added a new column to board with id: {}", request.getBoardId());
     return new ResponseEntity<>(newColumnDTO, HttpStatus.CREATED);
@@ -38,10 +37,10 @@ public class ColumnController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<ColumnDTO> deleteColumn(@PathVariable Long id) {
-    ColumnDTO deletedColumn = columnService.deleteColumn(id);
+  public ResponseEntity<Void> deleteColumn(@PathVariable Long id) {
+    columnService.deleteColumn(id);
 
     log.info("Successfully deleted the column with id: {}", id);
-    return new ResponseEntity<>(deletedColumn, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ColumnRepository extends JpaRepository<Column, Long> {
-  List<Column> findAllColumnsByBoardId(Long boardId);
+  List<Column> findAllByBoardId(Long boardId);
 
   @Query("SELECT c FROM Column c WHERE LOWER(c.name) = LOWER(:name) AND c.board.id = :boardId")
-  Optional<Column> findColumnByNameAndBoardId(@Param("name") String name,
+  Optional<Column> findByNameAndBoardId(@Param("name") String name,
                                               @Param("boardId") Long boardId);
 }

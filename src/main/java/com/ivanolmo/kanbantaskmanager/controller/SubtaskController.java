@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskCreationRequest;
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.SubtaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class SubtaskController {
   }
 
   @PostMapping
-  public ResponseEntity<SubtaskDTO> addSubtaskToTask(@Valid @RequestBody SubtaskCreationRequest request) {
+  public ResponseEntity<SubtaskDTO> addSubtaskToTask(@Valid @RequestBody SubtaskCreationRequestDTO request) {
     SubtaskDTO newSubtaskDTO = subtaskService.addSubtaskToTask(request.getTaskId(),
         request.getSubtask());
 
@@ -38,10 +38,10 @@ public class SubtaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<SubtaskDTO> deleteSubtask(@PathVariable Long id) {
-    SubtaskDTO deletedSubtask = subtaskService.deleteSubtask(id);
+  public ResponseEntity<Void> deleteSubtask(@PathVariable Long id) {
+    subtaskService.deleteSubtask(id);
 
     log.info("Successfully deleted the subtask with id: {}", id);
-    return new ResponseEntity<>(deletedSubtask, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

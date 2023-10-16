@@ -1,8 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskCreationRequest;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ public class TaskController {
   }
 
   @PostMapping
-  public ResponseEntity<TaskDTO> addTaskToColumn(@Valid @RequestBody TaskCreationRequest request) {
+  public ResponseEntity<TaskDTO> addTaskToColumn(@Valid @RequestBody TaskCreationRequestDTO request) {
     TaskDTO newTaskDTO = taskService.addTaskToColumn(request.getColumnId(), request.getTask());
 
     log.info("Successfully added a new task to column with id: {}", request.getColumnId());
@@ -38,10 +37,10 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<TaskDTO> deleteTask(@PathVariable Long id) {
-    TaskDTO deletedTask = taskService.deleteTask(id);
+  public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    taskService.deleteTask(id);
 
     log.info("Successfully deleted the task with id: {}", id);
-    return new ResponseEntity<>(deletedTask, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

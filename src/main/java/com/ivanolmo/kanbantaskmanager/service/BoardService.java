@@ -1,12 +1,12 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
 
 import java.util.List;
 
 public interface BoardService {
-  BoardDTO createBoard(BoardDTO board, Long userId);
+  BoardDTO addBoardToUser(Long userId, BoardDTO boardDTO);
 
   List<BoardDTO> getAllUserBoards(Long userId);
 
@@ -16,5 +16,5 @@ public interface BoardService {
 
   BoardDTO updateBoardName(Long id, BoardDTO boardDTO);
 
-  BoardDTO deleteBoard(Long id);
+  void deleteBoard(Long id);
 }
