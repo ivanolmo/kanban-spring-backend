@@ -2,8 +2,6 @@ package com.ivanolmo.kanbantaskmanager.entity;
 
 import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -22,8 +20,6 @@ public class Board {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "Board name cannot be blank")
-  @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
   @jakarta.persistence.Column(nullable = false)
   private String name;
 

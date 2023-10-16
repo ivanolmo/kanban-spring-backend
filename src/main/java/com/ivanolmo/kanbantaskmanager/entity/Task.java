@@ -21,13 +21,9 @@ public class Task {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "Task title cannot be blank")
-  @Size(min = 3, max = 50, message = "Task title should be between 3 and 50 characters")
   @jakarta.persistence.Column(nullable = false)
   private String title;
 
-  @NotBlank(message = "Task description cannot be blank")
-  @Size(min = 3, max = 255, message = "Task description should be between 3 and 255 characters")
   @jakarta.persistence.Column(nullable = false)
   private String description;
 
