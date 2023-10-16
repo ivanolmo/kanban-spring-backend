@@ -4,8 +4,6 @@ import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class SubtaskMapper {
   public SubtaskDTO toDTO(Subtask subtask) {
@@ -16,7 +14,7 @@ public class SubtaskMapper {
     return SubtaskDTO.builder()
         .id(subtask.getId())
         .title(subtask.getTitle())
-        .completed(Optional.ofNullable(subtask.getCompleted()))
+        .completed(subtask.getCompleted())
         .build();
   }
 
@@ -28,7 +26,7 @@ public class SubtaskMapper {
     return new Subtask.Builder()
         .id(subtaskDTO.getId())
         .title(subtaskDTO.getTitle())
-        .completed(subtaskDTO.getCompleted().orElse(null))
+        .completed(subtaskDTO.getCompleted())
         .build();
   }
 }

@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,5 +18,5 @@ public class SubtaskDTO {
   @Size(min = 3, max = 50, message = "Subtask title should be between 3 and 50 characters")
   private String title;
 
-  private Optional<Boolean> completed = Optional.of(false);
+  private Boolean completed = Boolean.FALSE;
 }

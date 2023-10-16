@@ -76,8 +76,8 @@ public class SubtaskServiceImpl implements SubtaskService {
 
     // check incoming dto for completed Optional<Boolean> value
     // update if present
-    if (subtaskDTO.getCompleted().isPresent()) {
-      subtask.setCompleted(subtaskDTO.getCompleted().orElse(null));
+    if (subtaskDTO.getCompleted() != null) {
+      subtask.setCompleted(subtaskDTO.getCompleted());
     }
 
     // perform update and return dto
