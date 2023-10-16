@@ -14,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-public class SubtaskServiceServiceImpl implements SubtaskService {
+public class SubtaskServiceImpl implements SubtaskService {
   private final SubtaskRepository subtaskRepository;
   private final TaskRepository taskRepository;
   private final SubtaskMapper subtaskMapper;
 
-  public SubtaskServiceServiceImpl(SubtaskRepository subtaskRepository,
-                                   TaskRepository taskRepository,
-                                   SubtaskMapper subtaskMapper) {
+  public SubtaskServiceImpl(SubtaskRepository subtaskRepository,
+                            TaskRepository taskRepository,
+                            SubtaskMapper subtaskMapper) {
     this.subtaskRepository = subtaskRepository;
     this.taskRepository = taskRepository;
     this.subtaskMapper = subtaskMapper;
