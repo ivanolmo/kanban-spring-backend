@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnCreationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.ColumnService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

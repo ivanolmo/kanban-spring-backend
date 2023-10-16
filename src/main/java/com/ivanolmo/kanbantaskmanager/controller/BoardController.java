@@ -1,8 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

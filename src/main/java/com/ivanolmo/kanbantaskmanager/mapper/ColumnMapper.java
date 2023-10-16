@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
 import com.ivanolmo.kanbantaskmanager.entity.Column;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -2,7 +2,7 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
 import com.ivanolmo.kanbantaskmanager.exception.column.*;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;

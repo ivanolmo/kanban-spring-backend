@@ -1,4 +1,4 @@
-package com.ivanolmo.kanbantaskmanager.entity.dto;
+package com.ivanolmo.kanbantaskmanager.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,12 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardDTO {
+public class ColumnDTO {
   private Long id;
 
-  @NotBlank(message = "Board name cannot be blank")
-  @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
+  @NotBlank(message = "Column name cannot be blank")
+  @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")
   private String name;
 
-  private List<ColumnDTO> columns;
+  private List<TaskDTO> tasks;
 }

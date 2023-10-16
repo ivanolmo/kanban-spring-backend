@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskCreationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.SubtaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.exception.task.TaskNotFoundException;
 import com.ivanolmo.kanbantaskmanager.mapper.SubtaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.SubtaskRepository;

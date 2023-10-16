@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskCreationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.exception.column.ColumnNotFoundException;
 import com.ivanolmo.kanbantaskmanager.exception.task.*;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;

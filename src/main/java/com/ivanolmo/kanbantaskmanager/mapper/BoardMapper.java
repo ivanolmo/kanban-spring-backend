@@ -1,14 +1,13 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class BoardMapper {

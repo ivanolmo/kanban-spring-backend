@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 
 public interface TaskService {
   TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO);
