@@ -133,10 +133,8 @@ public class BoardServiceImpl implements BoardService {
     // get board from opt
     Board board = optBoardToUpdate.get();
 
-    // get user
-    Long userId = Optional.ofNullable(board.getUser())
-        .map(User::getId)
-        .orElseThrow(() -> new UserNotFoundException("User not found for this board."));
+    // get user that this board belongs to
+    Long userId = board.getUser().getId();
 
     // check if the new name is the same as any existing board name for this user
     // if match is found throw exception

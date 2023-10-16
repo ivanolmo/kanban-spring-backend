@@ -66,9 +66,7 @@ public class ColumnServiceImpl implements ColumnService {
     Column column = optColumnToUpdate.get();
 
     // get board that this column belongs to
-    Long boardId = Optional.ofNullable(column.getBoard())
-        .map(Board::getId)
-        .orElseThrow(() -> new BoardNotFoundException("Board not found for this column."));
+    Long boardId = column.getBoard().getId();
 
     // check if the new column name is the same as any existing column name for this board
     // if match is found throw exception
