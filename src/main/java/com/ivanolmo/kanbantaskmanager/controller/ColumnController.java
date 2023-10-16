@@ -37,10 +37,10 @@ public class ColumnController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<ColumnDTO> deleteColumn(@PathVariable Long id) {
-    ColumnDTO deletedColumn = columnService.deleteColumn(id);
+  public ResponseEntity<Void> deleteColumn(@PathVariable Long id) {
+    columnService.deleteColumn(id);
 
     log.info("Successfully deleted the column with id: {}", id);
-    return new ResponseEntity<>(deletedColumn, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -38,10 +38,10 @@ public class SubtaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<SubtaskDTO> deleteSubtask(@PathVariable Long id) {
-    SubtaskDTO deletedSubtask = subtaskService.deleteSubtask(id);
+  public ResponseEntity<Void> deleteSubtask(@PathVariable Long id) {
+    subtaskService.deleteSubtask(id);
 
     log.info("Successfully deleted the subtask with id: {}", id);
-    return new ResponseEntity<>(deletedSubtask, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

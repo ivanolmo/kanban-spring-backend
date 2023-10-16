@@ -104,7 +104,7 @@ public class TaskServiceImpl implements TaskService {
 
   // delete task
   @Transactional
-  public TaskDTO deleteTask(Long id) {
+  public void deleteTask(Long id) {
     // get task by id
     Optional<Task> optTaskToDelete = taskRepository.findById(id);
 
@@ -113,11 +113,10 @@ public class TaskServiceImpl implements TaskService {
       throw new TaskNotFoundException("Task not found.");
     }
 
-    // capture the task to be deleted, delete, and return dto
+    // capture the task to be deleted and delete
     try {
       Task task = optTaskToDelete.get();
       taskRepository.delete(task);
-      return taskMapper.toDTO(task);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new TaskDeleteException("There was an error deleting this task.", e);

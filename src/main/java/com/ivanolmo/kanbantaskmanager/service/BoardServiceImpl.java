@@ -158,7 +158,7 @@ public class BoardServiceImpl implements BoardService {
 
   // delete board
   @Transactional
-  public BoardDTO deleteBoard(Long id) {
+  public void deleteBoard(Long id) {
     // get board by id or else throw exception
     Optional<Board> optBoard = boardRepository.findById(id);
 
@@ -167,10 +167,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     try {
-      // capture the board to be deleted, delete, and return
+      // capture the board to be deleted and delete
       Board board = optBoard.get();
       boardRepository.delete(board);
-      return boardMapper.toDTO(board);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new BoardDeleteException("There was an error deleting this board.", e);

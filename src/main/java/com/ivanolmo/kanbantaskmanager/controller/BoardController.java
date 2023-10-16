@@ -72,10 +72,10 @@ public class BoardController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<BoardDTO> deleteBoard(@PathVariable Long id) {
-    BoardDTO deletedBoard = boardService.deleteBoard(id);
+  public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
+    boardService.deleteBoard(id);
 
     log.info("Successfully deleted the board with id: {}", id);
-    return new ResponseEntity<>(deletedBoard, HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

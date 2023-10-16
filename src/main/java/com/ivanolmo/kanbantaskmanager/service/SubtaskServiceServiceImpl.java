@@ -106,7 +106,7 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
 
   // delete subtask
   @Transactional
-  public SubtaskDTO deleteSubtask(Long id) {
+  public void deleteSubtask(Long id) {
     // get subtask by id
     Optional<Subtask> optSubtaskToDelete = subtaskRepository.findById(id);
 
@@ -116,11 +116,10 @@ public class SubtaskServiceServiceImpl implements SubtaskService {
       throw new RuntimeException("Subtask not found.");
     }
 
-    // capture the subtask to be deleted, delete, and return dto
+    // capture the subtask to be deleted and delete
     try {
       Subtask subtask = optSubtaskToDelete.get();
       subtaskRepository.delete(subtask);
-      return subtaskMapper.toDTO(subtask);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       // TODO custom

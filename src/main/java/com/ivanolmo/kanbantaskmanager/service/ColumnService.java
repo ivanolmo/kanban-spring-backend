@@ -7,5 +7,5 @@ public interface ColumnService {
 
   ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO);
 
-  ColumnDTO deleteColumn(Long id);
+  void deleteColumn(Long id);
 }

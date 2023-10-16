@@ -91,7 +91,7 @@ public class ColumnServiceImpl implements ColumnService {
 
   // delete column
   @Transactional
-  public ColumnDTO deleteColumn(Long id) {
+  public void deleteColumn(Long id) {
     // get column by id or else throw exception
     Optional<Column> optColumn = columnRepository.findById(id);
 
@@ -99,11 +99,10 @@ public class ColumnServiceImpl implements ColumnService {
       throw new ColumnNotFoundException("Column not found.");
     }
 
-    // capture the column to be deleted, delete, and return
+    // capture the column to be deleted and delete
     try {
       Column column = optColumn.get();
       columnRepository.delete(column);
-      return columnMapper.toDTO(column);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new ColumnDeleteException("There was an error deleting this column.", e);

@@ -7,5 +7,5 @@ public interface SubtaskService {
 
   SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDTO);
 
-  SubtaskDTO deleteSubtask(Long id);
+  void deleteSubtask(Long id);
 }
