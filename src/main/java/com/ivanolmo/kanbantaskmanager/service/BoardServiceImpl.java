@@ -87,7 +87,7 @@ public class BoardServiceImpl implements BoardService {
   }
 
   @Transactional
-  public BoardDTO createBoard(BoardDTO boardDTO, Long userId) {
+  public BoardDTO addBoardToUser(Long userId, BoardDTO boardDTO) {
     // if board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
         .ifPresent(board -> {

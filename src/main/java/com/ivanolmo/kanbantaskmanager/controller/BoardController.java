@@ -55,8 +55,8 @@ public class BoardController {
   }
 
   @PostMapping
-  public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody BoardCreationRequestDTO request) {
-    BoardDTO newBoardDTO = boardService.createBoard(request.getBoard(), request.getUserId());
+  public ResponseEntity<BoardDTO> addBoardToUser(@Valid @RequestBody BoardCreationRequestDTO request) {
+    BoardDTO newBoardDTO = boardService.addBoardToUser(request.getUserId(), request.getBoard());
 
     log.info("Successfully created a new board with id: {}", newBoardDTO.getId());
     return new ResponseEntity<>(newBoardDTO, HttpStatus.CREATED);
