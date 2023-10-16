@@ -1,6 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,9 +21,13 @@ public class Task {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @NotBlank(message = "Task title cannot be blank")
+  @Size(min = 3, max = 50, message = "Task title should be between 3 and 50 characters")
   @jakarta.persistence.Column(nullable = false)
   private String title;
 
+  @NotBlank(message = "Task description cannot be blank")
+  @Size(min = 3, max = 255, message = "Task description should be between 3 and 255 characters")
   @jakarta.persistence.Column(nullable = false)
   private String description;
 
@@ -39,4 +45,27 @@ public class Task {
 
   @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Subtask> subtasks = new ArrayList<>();
+
+  public static class Builder {
+    private final Task task = new Task();
+
+    public Builder id(Long id) {
+      task.setId(id);
+      return this;
+    }
+
+    public Builder title(String title) {
+      task.setTitle(title);
+      return this;
+    }
+
+    public Builder description(String description) {
+      task.setDescription(description);
+      return this;
+    }
+
+    public Task build() {
+      return task;
+    }
+  }
 }

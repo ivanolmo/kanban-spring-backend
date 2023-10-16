@@ -17,4 +17,16 @@ public class TaskMapper {
         .description(task.getDescription())
         .build();
   }
+
+  public Task toEntity(TaskDTO taskDTO) {
+    if (taskDTO == null) {
+      return null;
+    }
+
+    return new Task.Builder()
+        .id(taskDTO.getId())
+        .title(taskDTO.getTitle())
+        .description(taskDTO.getDescription())
+        .build();
+  }
 }

@@ -6,8 +6,7 @@ import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
 import java.util.List;
 
 public interface TaskService {
-  TaskDTO addTaskToColumn(TaskDTO taskDTO, Long columnId);
-  Task getTaskById(Long id);
+  TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO);
   TaskDTO updateTask(Long id, TaskDTO taskDetails);
   TaskDTO deleteTask(Long id);
 }
