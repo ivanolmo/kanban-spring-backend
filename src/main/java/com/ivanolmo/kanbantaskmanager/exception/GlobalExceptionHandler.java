@@ -2,6 +2,7 @@ package com.ivanolmo.kanbantaskmanager.exception;
 
 import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.column.*;
+import com.ivanolmo.kanbantaskmanager.exception.task.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,31 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(ColumnDeleteException.class)
   public ResponseEntity<String> handleColumnDeleteException(ColumnDeleteException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(TaskNotFoundException.class)
+  public ResponseEntity<String> handleTaskNotFoundException(TaskNotFoundException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(TaskCreationException.class)
+  public ResponseEntity<String> handleTaskCreationException(TaskCreationException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(TaskUpdateException.class)
+  public ResponseEntity<String> handleTaskUpdateException(TaskUpdateException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(TaskDataAlreadyExistsException.class)
+  public ResponseEntity<String> handleTaskDataAlreadyExistsException(TaskDataAlreadyExistsException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(TaskDeleteException.class)
+  public ResponseEntity<String> handleTaskDeleteException(TaskDeleteException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 

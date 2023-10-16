@@ -1,5 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.entity.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +15,10 @@ import java.util.List;
 @Builder
 public class BoardDTO {
   private Long id;
+
+  @NotBlank(message = "Board name cannot be blank")
+  @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
   private String name;
+
   private List<ColumnDTO> columns;
 }

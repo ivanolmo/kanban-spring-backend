@@ -1,6 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -25,9 +27,6 @@ public class Task {
   @jakarta.persistence.Column(nullable = false)
   private String description;
 
-  @jakarta.persistence.Column(nullable = false)
-  private Boolean completed = false;
-
   @CreatedDate
   @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -42,4 +41,27 @@ public class Task {
 
   @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Subtask> subtasks = new ArrayList<>();
+
+  public static class Builder {
+    private final Task task = new Task();
+
+    public Builder id(Long id) {
+      task.setId(id);
+      return this;
+    }
+
+    public Builder title(String title) {
+      task.setTitle(title);
+      return this;
+    }
+
+    public Builder description(String description) {
+      task.setDescription(description);
+      return this;
+    }
+
+    public Task build() {
+      return task;
+    }
+  }
 }

@@ -20,8 +20,6 @@ public class Column {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "Column name cannot be blank")
-  @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")
   @jakarta.persistence.Column
   private String name;
 

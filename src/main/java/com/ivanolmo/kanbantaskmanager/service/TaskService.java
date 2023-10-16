@@ -1,13 +1,12 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.entity.Task;
+import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
 
 import java.util.List;
 
 public interface TaskService {
-  Task createTask(Task task);
-  List<Task> getAllColumnTasks(Long columnId);
-  Task getTaskById(Long id);
-  Task updateTask(Long id, Task taskDetails);
-  void deleteTask(Long id);
+  TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO);
+  TaskDTO updateTask(Long id, TaskDTO taskDetails);
+  TaskDTO deleteTask(Long id);
 }
