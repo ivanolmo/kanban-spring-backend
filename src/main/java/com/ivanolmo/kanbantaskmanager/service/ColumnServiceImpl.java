@@ -1,18 +1,17 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
 import com.ivanolmo.kanbantaskmanager.exception.column.*;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -33,13 +32,10 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
-    Optional<Board> boardOptional = boardRepository.findById(boardId);
-    if (boardOptional.isEmpty()) {
-      throw new BoardNotFoundException("Board not found.");
-    }
+    Board board = boardRepository.findById(boardId)
+        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
 
-    // get column from optional, convert the ColumnDTO to a Column entity and set to board
-    Board board = boardOptional.get();
+    // convert the ColumnDTO to a Column entity and set to board
     Column column = columnMapper.toEntity(columnDTO);
     column.setBoard(board);
 
@@ -56,27 +52,17 @@ public class ColumnServiceImpl implements ColumnService {
   @Transactional
   public ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO) {
     // get column by id or else throw exception
-    Optional<Column> columnToUpdateOptional = columnRepository.findById(id);
-
-    if (columnToUpdateOptional.isEmpty()) {
-      throw new ColumnNotFoundException("Column not found.");
-    }
-
-    // get column from opt
-    Column column = columnToUpdateOptional.get();
+    Column column = columnRepository.findById(id)
+        .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
 
     // get board that this column belongs to
     Long boardId = column.getBoard().getId();
 
-    // check if the new column name is the same as any existing column name for this board
-    // if match is found throw exception
-    Optional<Column> existingColumnNameOptional =
-        columnRepository.findByNameAndBoardId(columnDTO.getName(),
-            boardId);
-
-    if (existingColumnNameOptional.isPresent()) {
-      throw new ColumnAlreadyExistsException("A column with that name already exists.");
-    }
+    // if column name already exists for this board, throw error
+    columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
+        .ifPresent(existingColumn -> {
+          throw new ColumnAlreadyExistsException("A column with that name already exists.");
+        });
 
     // perform update and return dto
     try {
@@ -92,15 +78,12 @@ public class ColumnServiceImpl implements ColumnService {
   // delete column
   @Transactional
   public void deleteColumn(Long id) {
-    // get column by id or else throw exception
-    Optional<Column> columnOptional = columnRepository.findById(id);
-    if (columnOptional.isEmpty()) {
-      throw new ColumnNotFoundException("Column not found.");
-    }
-
-    // capture the column to be deleted and delete
+    // delete column or throw error if column not found
     try {
-      columnRepository.delete(columnOptional.get());
+      columnRepository.deleteById(id);
+    } catch (EmptyResultDataAccessException e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new ColumnNotFoundException("Column not found.");
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new ColumnDeleteException("There was an error deleting this column.", e);

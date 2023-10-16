@@ -1,10 +1,10 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.exception.board.*;
 import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
@@ -13,12 +13,11 @@ import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -51,27 +50,24 @@ public class BoardServiceImpl implements BoardService {
 
     // get users boards
     List<Board> boards =
-        boardRepository.findByUserId(userId).orElseThrow(() -> new BoardNotFoundException("No " +
-            "boards found for this user."));
+        boardRepository.findByUserId(userId)
+            .orElseThrow(() -> new BoardNotFoundException("No boards found for this user."));
 
     // map boards to DTOs and return as list
     return boards.stream()
         .map(boardMapper::toDTO)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // get board by id
   @Transactional(readOnly = true)
   public BoardDTO getBoardById(Long id) {
     // get board by id or else throw exception
-    Optional<Board> boardOptional = boardRepository.findById(id);
-
-    if (boardOptional.isEmpty()) {
-      throw new BoardNotFoundException("Board not found.");
-    }
+    Board board = boardRepository.findById(id)
+        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
 
     // map board to DTO and return
-    return boardMapper.toDTO(boardOptional.get());
+    return boardMapper.toDTO(board);
   }
 
   @Transactional(readOnly = true)
@@ -87,24 +83,21 @@ public class BoardServiceImpl implements BoardService {
     // map columns to DTOs and return as list
     return columns.stream()
         .map(columnMapper::toDTO)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Transactional
   public BoardDTO createBoard(BoardDTO boardDTO, Long userId) {
-    // check if board already exists
-    // get an Optional using a custom query and check if it is present. if present, throw error
-    Optional<Board> existingBoardOptional =
-        boardRepository.findByBoardNameAndUserId(boardDTO.getName(),
-            userId);
-    if (existingBoardOptional.isPresent()) {
-      throw new BoardAlreadyExistsException("A board with this name already exists.");
-    }
+    // if board name already exists for this user, throw error
+    boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
+        .ifPresent(board -> {
+          throw new BoardAlreadyExistsException("A board with this name already exists.");
+        });
 
-    // get the user from the repository
+    // get the user from the repository or else throw exception
     User user =
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not " +
-            "found."));
+        userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found."));
 
     // convert the BoardDTO to a Board entity and set user
     Board board = boardMapper.toEntity(boardDTO);
@@ -124,29 +117,20 @@ public class BoardServiceImpl implements BoardService {
   @Transactional
   public BoardDTO updateBoardName(Long id, BoardDTO boardDTO) {
     // get board by id or else throw exception
-    Optional<Board> boardToUpdateOptional = boardRepository.findById(id);
-
-    if (boardToUpdateOptional.isEmpty()) {
-      throw new BoardNotFoundException("Board not found.");
-    }
-
-    // get board from opt
-    Board board = boardToUpdateOptional.get();
+    Board board = boardRepository.findById(id)
+        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
 
     // get user that this board belongs to
     Long userId = board.getUser().getId();
 
-    // check if the new name is the same as any existing board name for this user
-    // if match is found throw exception
-    Optional<Board> existingBoardNameOptional =
-        boardRepository.findByBoardNameAndUserId(boardDTO.getName(), userId);
+    // if board name already exists for this user, throw error
+    boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
+        .ifPresent(existingBoard -> {
+          throw new BoardAlreadyExistsException("A board with that name already exists.");
+        });
 
-    if (existingBoardNameOptional.isPresent()) {
-      throw new BoardAlreadyExistsException("A board with that name already exists.");
-    }
-
+    // perform update and return dto
     try {
-      // perform update and return
       board.setName(boardDTO.getName());
       Board updatedBoard = boardRepository.save(board);
       return boardMapper.toDTO(updatedBoard);
@@ -159,14 +143,12 @@ public class BoardServiceImpl implements BoardService {
   // delete board
   @Transactional
   public void deleteBoard(Long id) {
-    // get board by id or else throw exception
-    Optional<Board> boardOptional = boardRepository.findById(id);
-    if (boardOptional.isEmpty()) {
-      throw new BoardNotFoundException("Board not found.");
-    }
-
+    // delete board or throw error if board not found
     try {
-      boardRepository.delete(boardOptional.get());
+      boardRepository.deleteById(id);
+    } catch (EmptyResultDataAccessException e) {
+      log.error("An error occurred: {}", e.getMessage());
+      throw new BoardNotFoundException("Board not found.");
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
       throw new BoardDeleteException("There was an error deleting this board.", e);
