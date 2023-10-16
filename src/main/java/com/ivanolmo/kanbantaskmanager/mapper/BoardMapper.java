@@ -3,6 +3,7 @@ package com.ivanolmo.kanbantaskmanager.mapper;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
+import com.ivanolmo.kanbantaskmanager.entity.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 @Component
 public class BoardMapper {
   private final TaskMapper taskMapper;
+  private final SubtaskMapper subtaskMapper;
 
-  public BoardMapper(TaskMapper taskMapper) {
+  public BoardMapper(TaskMapper taskMapper, SubtaskMapper subtaskMapper) {
     this.taskMapper = taskMapper;
+    this.subtaskMapper = subtaskMapper;
   }
 
   public BoardDTO toDTO(Board board) {
@@ -24,14 +27,21 @@ public class BoardMapper {
 
     List<ColumnDTO> columns = board.getColumns().stream()
         .map(column -> {
-          List<TaskDTO> taskDTOs = column.getTasks().stream()
-              .map(taskMapper::toDTO)
-              .collect(Collectors.toList());
+          List<TaskDTO> tasks = column.getTasks().stream()
+              .map(task -> {
+                TaskDTO taskDTO = taskMapper.toDTO(task);
 
+                List<SubtaskDTO> subtasks = task.getSubtasks().stream()
+                    .map(subtaskMapper::toDTO)
+                    .toList();
+
+                taskDTO.setSubtasks(subtasks);
+                return taskDTO;
+              }).toList();
           return new ColumnDTO(
               column.getId(),
               column.getName(),
-              taskDTOs
+              tasks
           );
         })
         .toList();

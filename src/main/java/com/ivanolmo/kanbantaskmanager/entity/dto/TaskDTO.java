@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,4 +23,6 @@ public class TaskDTO {
   @NotBlank(message = "Task description cannot be blank")
   @Size(min = 3, max = 255, message = "Task description should be between 3 and 255 characters")
   private String description;
+
+  private List<SubtaskDTO> subtasks;
 }
