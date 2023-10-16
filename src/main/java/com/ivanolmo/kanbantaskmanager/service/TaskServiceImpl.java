@@ -4,6 +4,7 @@ import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
 import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.exception.column.ColumnNotFoundException;
+import com.ivanolmo.kanbantaskmanager.exception.task.*;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
@@ -48,8 +49,7 @@ public class TaskServiceImpl implements TaskService {
       return taskMapper.toDTO(task);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      // TODO custom exception
-      throw new RuntimeException("Failed to create the task.", e);
+      throw new TaskCreationException("Failed to create the task.", e);
     }
   }
 
@@ -61,8 +61,7 @@ public class TaskServiceImpl implements TaskService {
 
     // throw exception if task is not found
     if (optTaskToUpdate.isEmpty()) {
-      // TODO custom exception
-      throw new RuntimeException("Task not found.");
+      throw new TaskNotFoundException("Task not found.");
     }
 
     // get task from opt
@@ -80,8 +79,7 @@ public class TaskServiceImpl implements TaskService {
 
       // if match is found throw exception
       if (existingTaskTitle.isPresent()) {
-        // TODO custom exception
-        throw new RuntimeException("A task with that title already exists.");
+        throw new TaskDataAlreadyExistsException("A task with that title already exists.");
       }
 
       // update the title
@@ -100,7 +98,7 @@ public class TaskServiceImpl implements TaskService {
       return taskMapper.toDTO(updatedTask);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      throw new RuntimeException("There was an error updating this task.", e);
+      throw new TaskUpdateException("There was an error updating this task.", e);
     }
   }
 
@@ -112,8 +110,7 @@ public class TaskServiceImpl implements TaskService {
 
     // throw exception if task is not found
     if (optTaskToDelete.isEmpty()) {
-      // TODO custom exception
-      throw new RuntimeException("Task not found.");
+      throw new TaskNotFoundException("Task not found.");
     }
 
     // capture the task to be deleted, delete, and return dto
@@ -123,8 +120,7 @@ public class TaskServiceImpl implements TaskService {
       return taskMapper.toDTO(task);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      // TODO custom exception
-      throw new RuntimeException("There was an error deleting this task.", e);
+      throw new TaskDeleteException("There was an error deleting this task.", e);
     }
   }
 }
