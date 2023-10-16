@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskCreationRequest {
-  private TaskDTO task;
-  private Long columnId;
+public class BoardCreationRequestDTO {
+  private BoardDTO board;
+  private Long userId;
 }

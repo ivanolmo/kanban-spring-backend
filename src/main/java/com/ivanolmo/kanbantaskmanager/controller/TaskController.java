@@ -1,7 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
-import com.ivanolmo.kanbantaskmanager.entity.dto.TaskCreationRequest;
+import com.ivanolmo.kanbantaskmanager.entity.dto.TaskCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.TaskService;
 import jakarta.validation.Valid;
@@ -21,7 +20,7 @@ public class TaskController {
   }
 
   @PostMapping
-  public ResponseEntity<TaskDTO> addTaskToColumn(@Valid @RequestBody TaskCreationRequest request) {
+  public ResponseEntity<TaskDTO> addTaskToColumn(@Valid @RequestBody TaskCreationRequestDTO request) {
     TaskDTO newTaskDTO = taskService.addTaskToColumn(request.getColumnId(), request.getTask());
 
     log.info("Successfully added a new task to column with id: {}", request.getColumnId());

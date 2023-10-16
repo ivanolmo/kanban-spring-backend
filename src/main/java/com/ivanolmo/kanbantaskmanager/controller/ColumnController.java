@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnCreationRequest;
+import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.ColumnService;
 import jakarta.validation.Valid;
@@ -20,7 +20,7 @@ public class ColumnController {
   }
 
   @PostMapping
-  public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequest request) {
+  public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequestDTO request) {
     ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getBoardId(), request.getColumn());
 
     log.info("Successfully added a new column to board with id: {}", request.getBoardId());

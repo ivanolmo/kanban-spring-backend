@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ColumnCreationRequest {
+public class ColumnCreationRequestDTO {
   private ColumnDTO column;
   private Long boardId;
 }

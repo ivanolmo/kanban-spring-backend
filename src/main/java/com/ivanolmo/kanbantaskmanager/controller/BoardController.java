@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequest;
+import com.ivanolmo.kanbantaskmanager.entity.dto.BoardCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.entity.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
@@ -55,7 +55,7 @@ public class BoardController {
   }
 
   @PostMapping
-  public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody BoardCreationRequest request) {
+  public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody BoardCreationRequestDTO request) {
     BoardDTO newBoardDTO = boardService.createBoard(request.getBoard(), request.getUserId());
 
     log.info("Successfully created a new board with id: {}", newBoardDTO.getId());
