@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.dto;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardCreationRequestDTO {
+  @Valid
   private BoardDTO board;
   private Long userId;
 }
