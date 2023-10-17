@@ -35,7 +35,7 @@ public class Column {
   @JoinColumn(name = "board_id", nullable = false)
   private Board board;
 
-  @OneToMany(mappedBy = "column")
+  @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Task> tasks;
 
   // custom Builder class for dto -> entity conversion
