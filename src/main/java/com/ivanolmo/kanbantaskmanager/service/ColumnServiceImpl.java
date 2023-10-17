@@ -35,10 +35,17 @@ public class ColumnServiceImpl implements ColumnService {
     Board board = boardRepository.findById(boardId)
         .orElseThrow(() -> new BoardNotFoundException("Board not found."));
 
+    // if new column name already exists for this board, throw error
+    columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
+        .ifPresent(existingColumn -> {
+          throw new ColumnAlreadyExistsException("A column with that name already exists.");
+        });
+
     // convert the ColumnDTO to a Column entity and set to board
     Column column = columnMapper.toEntity(columnDTO);
     column.setBoard(board);
 
+    // save and return dto, throw error if exception
     try {
       column = columnRepository.save(column);
       return columnMapper.toDTO(column);

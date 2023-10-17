@@ -35,11 +35,17 @@ public class TaskServiceImpl implements TaskService {
     Column column = columnRepository.findById(columnId)
         .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
 
+    // if new task title already exists for this column, throw error
+    taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
+        .ifPresent(existingTask -> {
+          throw new TaskDataAlreadyExistsException("A task with that title already exists.");
+        });
+
     // convert the TaskDTO to a Task entity and set to column
     Task task = taskMapper.toEntity(taskDTO);
     task.setColumn(column);
 
-    // save to repository and return dto, if error throw exception
+    // save and return dto, throw error if exception
     try {
       task = taskRepository.save(task);
       return taskMapper.toDTO(task);

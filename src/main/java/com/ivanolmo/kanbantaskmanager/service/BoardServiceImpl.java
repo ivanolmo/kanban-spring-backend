@@ -88,22 +88,22 @@ public class BoardServiceImpl implements BoardService {
 
   @Transactional
   public BoardDTO addBoardToUser(Long userId, BoardDTO boardDTO) {
-    // if board name already exists for this user, throw error
+    // get user, throw error if not found
+    User user =
+        userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+    // if new board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
         .ifPresent(board -> {
           throw new BoardAlreadyExistsException("A board with this name already exists.");
         });
 
-    // get the user from the repository or else throw exception
-    User user =
-        userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("User not found."));
-
     // convert the BoardDTO to a Board entity and set user
     Board board = boardMapper.toEntity(boardDTO);
     board.setUser(user);
 
-    // perform creation and return dto
+    // save and return dto, throw error if exception
     try {
       board = boardRepository.save(board);
       return boardMapper.toDTO(board);

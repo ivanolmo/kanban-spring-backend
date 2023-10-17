@@ -1,8 +1,12 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskDataAlreadyExistsException;
+import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskDeleteException;
+import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskNotFoundException;
+import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskUpdateException;
 import com.ivanolmo.kanbantaskmanager.exception.task.TaskNotFoundException;
 import com.ivanolmo.kanbantaskmanager.mapper.SubtaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.SubtaskRepository;
@@ -34,11 +38,17 @@ public class SubtaskServiceImpl implements SubtaskService {
     Task task = taskRepository.findById(taskId)
         .orElseThrow(() -> new TaskNotFoundException("Task not found."));
 
+    // if new task title already exists for this column, throw error
+    subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
+        .ifPresent(existingSubtask -> {
+          throw new SubtaskDataAlreadyExistsException("A subtask with that title already exists.");
+        });
+
     // convert the SubtaskDTO to a Subtask entity and set to task
     Subtask subtask = subtaskMapper.toEntity(subtaskDTO);
     subtask.setTask(task);
 
-    // save to repository and return dto, if error throw exception
+    // save and return dto, throw error if exception
     try {
       subtask = subtaskRepository.save(subtask);
       return subtaskMapper.toDTO(subtask);
@@ -52,10 +62,9 @@ public class SubtaskServiceImpl implements SubtaskService {
   // update subtask
   @Transactional
   public SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDTO) {
-    // get subtask by id
+    // get subtask by id or else throw exception
     Subtask subtask = subtaskRepository.findById(id)
-        // TODO custom
-        .orElseThrow(() -> new RuntimeException("Subtask not found."));
+        .orElseThrow(() -> new SubtaskNotFoundException("Subtask not found."));
 
     // get task that this subtask belongs to
     Long taskId = subtask.getTask().getId();
@@ -64,10 +73,9 @@ public class SubtaskServiceImpl implements SubtaskService {
     // this check is in place to prevent issues when a user only wants to update one subtask value
     if (subtaskDTO.getTitle() != null) {
       // check if the new subtask title is the same as any existing subtask title for this task
-      subtaskRepository.findByTitleAndTaskIAndId(subtask.getTitle(), taskId)
+      subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
           .ifPresent(existingSubtask -> {
-            // TODO custom
-            throw new RuntimeException("A subtask with that title already exists.");
+            throw new SubtaskDataAlreadyExistsException("A subtask with that title already exists.");
           });
 
       // update the title
@@ -86,8 +94,7 @@ public class SubtaskServiceImpl implements SubtaskService {
       return subtaskMapper.toDTO(updatedSubtask);
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      // TODO custom
-      throw new RuntimeException("There was an error updating this subtask.", e);
+      throw new SubtaskUpdateException("There was an error updating this subtask.", e);
     }
   }
 
@@ -99,12 +106,10 @@ public class SubtaskServiceImpl implements SubtaskService {
       subtaskRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {
       log.error("An error occurred: {}", e.getMessage());
-      // TODO custom
-      throw new RuntimeException("Subtask not found.");
+      throw new SubtaskNotFoundException("Subtask not found.");
     } catch (Exception e) {
       log.error("An error occurred: {}", e.getMessage());
-      // TODO custom
-      throw new RuntimeException("There was an error deleting this subtask.", e);
+      throw new SubtaskDeleteException("There was an error deleting this subtask.", e);
     }
   }
 }
