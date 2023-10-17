@@ -1,7 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.ivanolmo.kanbantaskmanager.dto.validation.ValidTask;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,15 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ValidTask
 public class TaskDTO {
   private Long id;
 
-  @NotBlank(message = "Task title cannot be blank")
-  @Size(min = 3, max = 50, message = "Task title should be between 3 and 50 characters")
   private String title;
 
-  @NotBlank(message = "Task description cannot be blank")
-  @Size(min = 3, max = 255, message = "Task description should be between 3 and 255 characters")
   private String description;
 
   private List<SubtaskDTO> subtasks;

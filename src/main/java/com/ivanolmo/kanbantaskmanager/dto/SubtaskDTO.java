@@ -1,7 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.ivanolmo.kanbantaskmanager.dto.validation.ValidSubtask;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,12 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ValidSubtask
 public class SubtaskDTO {
   private Long id;
 
-  @NotBlank(message = "Subtask title cannot be blank")
-  @Size(min = 3, max = 50, message = "Subtask title should be between 3 and 50 characters")
   private String title;
 
+  @Builder.Default
   private Boolean completed = Boolean.FALSE;
 }
