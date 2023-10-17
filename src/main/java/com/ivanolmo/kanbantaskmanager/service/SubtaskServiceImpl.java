@@ -3,16 +3,13 @@ package com.ivanolmo.kanbantaskmanager.service;
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskDataAlreadyExistsException;
-import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskDeleteException;
-import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskNotFoundException;
-import com.ivanolmo.kanbantaskmanager.exception.subtask.SubtaskUpdateException;
-import com.ivanolmo.kanbantaskmanager.exception.task.TaskNotFoundException;
+import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.SubtaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.SubtaskRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +33,13 @@ public class SubtaskServiceImpl implements SubtaskService {
   public SubtaskDTO addSubtaskToTask(Long taskId, SubtaskDTO subtaskDTO) {
     // get task, throw error if not found
     Task task = taskRepository.findById(taskId)
-        .orElseThrow(() -> new TaskNotFoundException("Task not found."));
+        .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
     // if new task title already exists for this column, throw error
     subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
         .ifPresent(existingSubtask -> {
-          throw new SubtaskDataAlreadyExistsException("A subtask with that title already exists.");
+          throw new EntityOperationException("A subtask with that title already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // convert the SubtaskDTO to a Subtask entity and set to task
@@ -53,9 +51,9 @@ public class SubtaskServiceImpl implements SubtaskService {
       subtask = subtaskRepository.save(subtask);
       return subtaskMapper.toDTO(subtask);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      // TODO custom
-      throw new RuntimeException("Failed to create the task.", e);
+      log.error("An error occurred while adding subtask '{}' to task '{}': {}",
+          subtaskDTO.getTitle(), task.getTitle(), e.getMessage());
+      throw new EntityOperationException("Subtask", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -64,7 +62,7 @@ public class SubtaskServiceImpl implements SubtaskService {
   public SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDTO) {
     // get subtask by id or else throw exception
     Subtask subtask = subtaskRepository.findById(id)
-        .orElseThrow(() -> new SubtaskNotFoundException("Subtask not found."));
+        .orElseThrow(() -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
 
     // get task that this subtask belongs to
     Long taskId = subtask.getTask().getId();
@@ -75,7 +73,8 @@ public class SubtaskServiceImpl implements SubtaskService {
       // check if the new subtask title is the same as any existing subtask title for this task
       subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
           .ifPresent(existingSubtask -> {
-            throw new SubtaskDataAlreadyExistsException("A subtask with that title already exists.");
+            throw new EntityOperationException("A subtask with that title already exists.",
+                HttpStatus.CONFLICT);
           });
 
       // update the title
@@ -93,23 +92,26 @@ public class SubtaskServiceImpl implements SubtaskService {
       Subtask updatedSubtask = subtaskRepository.save(subtask);
       return subtaskMapper.toDTO(updatedSubtask);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new SubtaskUpdateException("There was an error updating this subtask.", e);
+      log.error("An error occurred while updating subtask '{}': {}",
+          subtaskDTO.getTitle(), e.getMessage());
+      throw new EntityOperationException("Subtask", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   // delete subtask
   @Transactional
   public void deleteSubtask(Long id) {
-    // delete subtask or throw error if subtask not found
+    // delete task or throw error if task not found
     try {
       subtaskRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new SubtaskNotFoundException("Subtask not found.");
+      log.error("An error occurred while deleting subtask id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Subtask", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new SubtaskDeleteException("There was an error deleting this subtask.", e);
+      log.error("An error occurred while deleting subtask id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Subtask", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

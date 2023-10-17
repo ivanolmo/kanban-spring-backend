@@ -3,13 +3,13 @@ package com.ivanolmo.kanbantaskmanager.service;
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
-import com.ivanolmo.kanbantaskmanager.exception.board.BoardNotFoundException;
-import com.ivanolmo.kanbantaskmanager.exception.column.*;
+import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +33,13 @@ public class ColumnServiceImpl implements ColumnService {
   public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
     Board board = boardRepository.findById(boardId)
-        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
+        .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
     // if new column name already exists for this board, throw error
     columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
         .ifPresent(existingColumn -> {
-          throw new ColumnAlreadyExistsException("A column with that name already exists.");
+          throw new EntityOperationException("A column with that name already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // convert the ColumnDTO to a Column entity and set to board
@@ -50,8 +51,9 @@ public class ColumnServiceImpl implements ColumnService {
       column = columnRepository.save(column);
       return columnMapper.toDTO(column);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnCreationException("Failed to create the column.", e);
+      log.error("An error occurred while adding column '{}' to board '{}': {}",
+          columnDTO.getName(), board.getName(), e.getMessage());
+      throw new EntityOperationException("Column", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -60,7 +62,7 @@ public class ColumnServiceImpl implements ColumnService {
   public ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO) {
     // get column by id or else throw exception
     Column column = columnRepository.findById(id)
-        .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
+        .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
 
     // get board that this column belongs to
     Long boardId = column.getBoard().getId();
@@ -68,7 +70,8 @@ public class ColumnServiceImpl implements ColumnService {
     // if column name already exists for this board, throw error
     columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
         .ifPresent(existingColumn -> {
-          throw new ColumnAlreadyExistsException("A column with that name already exists.");
+          throw new EntityOperationException("A column with that name already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // perform update and return dto
@@ -77,8 +80,9 @@ public class ColumnServiceImpl implements ColumnService {
       Column updatedColumn = columnRepository.save(column);
       return columnMapper.toDTO(updatedColumn);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnUpdateException("There was an error updating this column.", e);
+      log.error("An error occurred while updating column '{}': {}",
+          columnDTO.getName(), e.getMessage());
+      throw new EntityOperationException("Column", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -89,11 +93,13 @@ public class ColumnServiceImpl implements ColumnService {
     try {
       columnRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnNotFoundException("Column not found.");
+      log.error("An error occurred while deleting column id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Column", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new ColumnDeleteException("There was an error deleting this column.", e);
+      log.error("An error occurred while deleting column id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Column", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

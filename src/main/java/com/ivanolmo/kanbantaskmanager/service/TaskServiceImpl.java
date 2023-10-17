@@ -3,13 +3,13 @@ package com.ivanolmo.kanbantaskmanager.service;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
-import com.ivanolmo.kanbantaskmanager.exception.column.ColumnNotFoundException;
-import com.ivanolmo.kanbantaskmanager.exception.task.*;
+import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +33,13 @@ public class TaskServiceImpl implements TaskService {
   public TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO) {
     // get column, throw error if not found
     Column column = columnRepository.findById(columnId)
-        .orElseThrow(() -> new ColumnNotFoundException("Column not found."));
+        .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
 
     // if new task title already exists for this column, throw error
     taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
         .ifPresent(existingTask -> {
-          throw new TaskDataAlreadyExistsException("A task with that title already exists.");
+          throw new EntityOperationException("A task with that title already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // convert the TaskDTO to a Task entity and set to column
@@ -50,8 +51,9 @@ public class TaskServiceImpl implements TaskService {
       task = taskRepository.save(task);
       return taskMapper.toDTO(task);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new TaskCreationException("Failed to create the task.", e);
+      log.error("An error occurred while adding task '{}' to column '{}': {}",
+          taskDTO.getTitle(), column.getName(), e.getMessage());
+      throw new EntityOperationException("Task", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -60,7 +62,7 @@ public class TaskServiceImpl implements TaskService {
   public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
     // get task by id or else throw exception
     Task task = taskRepository.findById(id)
-        .orElseThrow(() -> new TaskNotFoundException("Task not found."));
+        .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
     // get column that this task belongs to
     Long columnId = task.getColumn().getId();
@@ -72,7 +74,8 @@ public class TaskServiceImpl implements TaskService {
       // if match is found throw exception
       taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
           .ifPresent(existingTask -> {
-            throw new TaskDataAlreadyExistsException("A task with that title already exists.");
+            throw new EntityOperationException("A task with that title already exists.",
+                HttpStatus.CONFLICT);
           });
 
       // update the title
@@ -90,8 +93,9 @@ public class TaskServiceImpl implements TaskService {
       Task updatedTask = taskRepository.save(task);
       return taskMapper.toDTO(updatedTask);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new TaskUpdateException("There was an error updating this task.", e);
+      log.error("An error occurred while updating task '{}': {}",
+          taskDTO.getTitle(), e.getMessage());
+      throw new EntityOperationException("Task", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -102,11 +106,13 @@ public class TaskServiceImpl implements TaskService {
     try {
       taskRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new TaskNotFoundException("Task not found.");
+      log.error("An error occurred while deleting task id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Task", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new TaskDeleteException("There was an error deleting this task.", e);
+      log.error("An error occurred while deleting task id '{}': {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Task", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

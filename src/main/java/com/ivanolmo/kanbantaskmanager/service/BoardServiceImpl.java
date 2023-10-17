@@ -5,8 +5,7 @@ import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.exception.board.*;
-import com.ivanolmo.kanbantaskmanager.exception.user.UserNotFoundException;
+import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
 import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
@@ -14,9 +13,11 @@ import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -45,13 +46,11 @@ public class BoardServiceImpl implements BoardService {
   public List<BoardDTO> getAllUserBoards(Long userId) {
     // find user by id or else throw exception
     if (!userRepository.existsById(userId)) {
-      throw new UserNotFoundException("User does not exist.");
+      throw new EntityOperationException("User", "read", HttpStatus.NOT_FOUND);
     }
 
     // get users boards
-    List<Board> boards =
-        boardRepository.findByUserId(userId)
-            .orElseThrow(() -> new BoardNotFoundException("No boards found for this user."));
+    List<Board> boards = boardRepository.findByUserId(userId).orElse(Collections.emptyList());
 
     // map boards to DTOs and return as list
     return boards.stream()
@@ -64,7 +63,7 @@ public class BoardServiceImpl implements BoardService {
   public BoardDTO getBoardById(Long id) {
     // get board by id or else throw exception
     Board board = boardRepository.findById(id)
-        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
+        .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
     // map board to DTO and return
     return boardMapper.toDTO(board);
@@ -74,11 +73,12 @@ public class BoardServiceImpl implements BoardService {
   public List<ColumnDTO> getAllColumnsForBoard(Long boardId) {
     // find board by id or else throw exception
     if (!boardRepository.existsById(boardId)) {
-      throw new BoardNotFoundException("Board not found.");
+      throw new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND);
     }
 
     // get board columns
-    List<Column> columns = columnRepository.findAllByBoardId(boardId);
+    List<Column> columns = columnRepository.findAllByBoardId(boardId).orElse(Collections.emptyList());
+
 
     // map columns to DTOs and return as list
     return columns.stream()
@@ -91,12 +91,13 @@ public class BoardServiceImpl implements BoardService {
     // get user, throw error if not found
     User user =
         userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("User not found."));
+            .orElseThrow(() -> new EntityOperationException("User", "read", HttpStatus.NOT_FOUND));
 
     // if new board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
         .ifPresent(board -> {
-          throw new BoardAlreadyExistsException("A board with this name already exists.");
+          throw new EntityOperationException("A board with that name already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // convert the BoardDTO to a Board entity and set user
@@ -108,8 +109,9 @@ public class BoardServiceImpl implements BoardService {
       board = boardRepository.save(board);
       return boardMapper.toDTO(board);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new BoardCreationException("Failed to create the board.", e);
+      log.error("An error occurred while adding board '{}' to user '{}': {}",
+          boardDTO.getName(), userId, e.getMessage());
+      throw new EntityOperationException("Board", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -118,7 +120,7 @@ public class BoardServiceImpl implements BoardService {
   public BoardDTO updateBoardName(Long id, BoardDTO boardDTO) {
     // get board by id or else throw exception
     Board board = boardRepository.findById(id)
-        .orElseThrow(() -> new BoardNotFoundException("Board not found."));
+        .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
     // get user that this board belongs to
     Long userId = board.getUser().getId();
@@ -126,7 +128,8 @@ public class BoardServiceImpl implements BoardService {
     // if board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
         .ifPresent(existingBoard -> {
-          throw new BoardAlreadyExistsException("A board with that name already exists.");
+          throw new EntityOperationException("A board with that name already exists.",
+              HttpStatus.CONFLICT);
         });
 
     // perform update and return dto
@@ -135,8 +138,9 @@ public class BoardServiceImpl implements BoardService {
       Board updatedBoard = boardRepository.save(board);
       return boardMapper.toDTO(updatedBoard);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new BoardUpdateException("There was an error updating this board.", e);
+      log.error("An error occurred while updating board '{}': {}",
+          boardDTO.getName(), e.getMessage());
+      throw new EntityOperationException("Board", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -147,11 +151,13 @@ public class BoardServiceImpl implements BoardService {
     try {
       boardRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new BoardNotFoundException("Board not found.");
+      log.error("An error occurred while deleting board id {}: {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Board", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
-      log.error("An error occurred: {}", e.getMessage());
-      throw new BoardDeleteException("There was an error deleting this board.", e);
+      log.error("An error occurred while deleting board id {}: {}",
+          id, e.getMessage());
+      throw new EntityOperationException("Board", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
