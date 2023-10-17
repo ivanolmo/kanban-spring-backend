@@ -7,7 +7,9 @@ import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class BoardMapper {
@@ -26,11 +28,15 @@ public class BoardMapper {
 
     List<ColumnDTO> columns = board.getColumns().stream()
         .map(column -> {
-          List<TaskDTO> tasks = column.getTasks().stream()
+          List<TaskDTO> tasks = Optional.ofNullable(column.getTasks())
+              .orElse(Collections.emptyList())
+              .stream()
               .map(task -> {
                 TaskDTO taskDTO = taskMapper.toDTO(task);
 
-                List<SubtaskDTO> subtasks = task.getSubtasks().stream()
+                List<SubtaskDTO> subtasks = Optional.ofNullable(task.getSubtasks())
+                    .orElse(Collections.emptyList())
+                    .stream()
                     .map(subtaskMapper::toDTO)
                     .toList();
 
