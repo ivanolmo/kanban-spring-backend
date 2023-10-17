@@ -1,11 +1,14 @@
 package com.ivanolmo.kanbantaskmanager.exception.user;
 
-public class UserNotFoundException extends RuntimeException{
+import com.ivanolmo.kanbantaskmanager.exception.BaseException;
+import org.springframework.http.HttpStatus;
+
+public class UserNotFoundException extends BaseException {
   public UserNotFoundException(String message) {
-    super(message);
+    super(message, HttpStatus.NOT_FOUND);
   }
 
   public UserNotFoundException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, cause, HttpStatus.NOT_FOUND);
   }
 }

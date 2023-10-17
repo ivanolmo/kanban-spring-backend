@@ -1,11 +1,14 @@
 package com.ivanolmo.kanbantaskmanager.exception.task;
 
-public class TaskCreationException extends RuntimeException {
+import com.ivanolmo.kanbantaskmanager.exception.BaseException;
+import org.springframework.http.HttpStatus;
+
+public class TaskCreationException extends BaseException {
   public TaskCreationException(String message) {
-    super(message);
+    super(message, HttpStatus.BAD_REQUEST);
   }
 
   public TaskCreationException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, cause, HttpStatus.BAD_REQUEST);
   }
 }

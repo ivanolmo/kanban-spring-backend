@@ -1,11 +1,14 @@
 package com.ivanolmo.kanbantaskmanager.exception.board;
 
-public class BoardAlreadyExistsException extends RuntimeException{
+import com.ivanolmo.kanbantaskmanager.exception.BaseException;
+import org.springframework.http.HttpStatus;
+
+public class BoardAlreadyExistsException extends BaseException {
   public BoardAlreadyExistsException(String message) {
-    super(message);
+    super(message, HttpStatus.CONFLICT);
   }
 
   public BoardAlreadyExistsException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, cause, HttpStatus.CONFLICT);
   }
 }

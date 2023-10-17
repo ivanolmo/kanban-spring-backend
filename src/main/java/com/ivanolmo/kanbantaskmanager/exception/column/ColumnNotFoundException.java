@@ -1,11 +1,14 @@
 package com.ivanolmo.kanbantaskmanager.exception.column;
 
-public class ColumnNotFoundException extends RuntimeException {
+import com.ivanolmo.kanbantaskmanager.exception.BaseException;
+import org.springframework.http.HttpStatus;
+
+public class ColumnNotFoundException extends BaseException {
   public ColumnNotFoundException(String message) {
-    super(message);
+    super(message, HttpStatus.NOT_FOUND);
   }
 
   public ColumnNotFoundException(String message, Throwable cause) {
-    super(message, cause);
+    super(message, cause, HttpStatus.NOT_FOUND);
   }
 }
