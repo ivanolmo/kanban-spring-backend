@@ -26,7 +26,9 @@ public class BoardMapper {
       return null;
     }
 
-    List<ColumnDTO> columns = board.getColumns().stream()
+    List<ColumnDTO> columns = Optional.ofNullable(board.getColumns())
+        .orElse(Collections.emptyList())
+        .stream()
         .map(column -> {
           List<TaskDTO> tasks = Optional.ofNullable(column.getTasks())
               .orElse(Collections.emptyList())

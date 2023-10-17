@@ -9,7 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Entity
@@ -58,7 +60,9 @@ public class Board {
     }
 
     public Builder columns(List<ColumnDTO> columnDTOs) {
-      List<Column> columns = columnDTOs.stream()
+      List<Column> columns = Optional.ofNullable(columnDTOs)
+          .orElse(Collections.emptyList())
+          .stream()
           .map(columnDTO -> {
             Column column = new Column();
             column.setName(columnDTO.getName());
