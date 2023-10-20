@@ -96,7 +96,7 @@ public class BoardServiceImpl implements BoardService {
     // if new board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
         .ifPresent(board -> {
-          throw new EntityOperationException("A board with that name already exists.",
+          throw new EntityOperationException("A board with that name already exists",
               HttpStatus.CONFLICT);
         });
 
@@ -122,13 +122,18 @@ public class BoardServiceImpl implements BoardService {
     Board board = boardRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
-    // get user that this board belongs to
-    String userId = board.getUser().getId();
+    // get user that this board belongs to or else throw exception
+    // an error being thrown here would signify a data integrity issue
+    User user = board.getUser();
+
+    if (user == null) {
+      throw new EntityOperationException("User", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // if board name already exists for this user, throw error
-    boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
+    boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())
         .ifPresent(existingBoard -> {
-          throw new EntityOperationException("A board with that name already exists.",
+          throw new EntityOperationException("A board with that name already exists",
               HttpStatus.CONFLICT);
         });
 
