@@ -41,7 +41,7 @@ public class ColumnServiceImplTest {
     columnDTO.setName("New Column");
 
     Board board = new Board();
-    Long boardId = 1L;
+    String boardId = "board";
     board.setId(boardId);
     board.setName("Test Board");
 
@@ -70,7 +70,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testAddColumnToBoard_boardNotFoundException() {
     // given
-    Long boardId = 1L;
+    String boardId = "board";
     ColumnDTO columnDTO = new ColumnDTO();
 
     // when
@@ -89,7 +89,7 @@ public class ColumnServiceImplTest {
     columnDTO.setName("");
 
     Board board = new Board();
-    Long boardId = 1L;
+    String boardId = "board";
     board.setId(boardId);
     board.setName("Test Board");
 
@@ -114,13 +114,13 @@ public class ColumnServiceImplTest {
   @Test
   public void testUpdateColumnName() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
     String newName = "Updated Column Name";
     ColumnDTO columnDTO = new ColumnDTO();
     columnDTO.setName(newName);
 
     Board board = new Board();
-    Long boardId = 1L;
+    String boardId = "board";
     board.setId(boardId);
     board.setName("Test Board");
 
@@ -152,7 +152,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testUpdateColumnName_columnNotFoundException() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
     ColumnDTO columnDTO = new ColumnDTO();
 
     // when
@@ -167,7 +167,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testUpdateColumnName_boardNotFoundException() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
     ColumnDTO columnDTO = new ColumnDTO();
     Column column = new Column();
 
@@ -183,13 +183,13 @@ public class ColumnServiceImplTest {
   @Test
   public void testUpdateColumnName_columnAlreadyExistsException() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
     String newName = "Updated Column Name";
     ColumnDTO columnDTO = new ColumnDTO();
     columnDTO.setName(newName);
 
     Board board = new Board();
-    Long boardId = 1L;
+    String boardId = "board";
     board.setId(boardId);
 
     Column column = new Column();
@@ -209,7 +209,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testUpdateColumnName_columnUpdateException() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
     ColumnDTO columnDTO = new ColumnDTO();
     columnDTO.setName("Updated Name");
 
@@ -217,7 +217,7 @@ public class ColumnServiceImplTest {
     column.setId(columnId);
     column.setName("Old Name");
     Board board = new Board();
-    Long boardId = 1L;
+    String boardId = "board";
     board.setId(boardId);
     column.setBoard(board);
 
@@ -235,7 +235,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testDeleteColumn() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
 
     // when
     doNothing().when(columnRepository).deleteById(columnId);
@@ -250,7 +250,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testDeleteColumn_columnNotFound() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
 
     // when
     doThrow(EmptyResultDataAccessException.class).when(columnRepository).deleteById(columnId);
@@ -269,7 +269,7 @@ public class ColumnServiceImplTest {
   @Test
   public void testDeleteColumn_unexpectedError() {
     // given
-    Long columnId = 1L;
+    String columnId = "column";
 
     // when
     doThrow(RuntimeException.class).when(columnRepository).deleteById(columnId);

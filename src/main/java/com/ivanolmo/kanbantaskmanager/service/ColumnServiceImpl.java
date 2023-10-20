@@ -72,7 +72,7 @@ public class ColumnServiceImpl implements ColumnService {
       throw new EntityOperationException("Board", "read", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Long boardId = board.getId();
+    String boardId = "board";
 
     // if column name already exists for this board, throw error
     columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
