@@ -25,7 +25,7 @@ public class BoardController {
   }
 
   @GetMapping
-  public ResponseEntity<List<BoardDTO>> getAllUserBoards(@RequestParam Long userId,
+  public ResponseEntity<List<BoardDTO>> getAllUserBoards(@RequestParam String userId,
                                                          HttpServletRequest request) {
     CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
     if (csrfToken != null) {
@@ -39,7 +39,7 @@ public class BoardController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<BoardDTO> getBoardById(@PathVariable Long id) {
+  public ResponseEntity<BoardDTO> getBoardById(@PathVariable String id) {
     BoardDTO board = boardService.getBoardById(id);
 
     log.info("Successfully retrieved the board with id: {}", id);
@@ -47,7 +47,7 @@ public class BoardController {
   }
 
   @GetMapping("/{id}/columns")
-  public ResponseEntity<List<ColumnDTO>> getAllColumnsForBoard(@PathVariable Long id) {
+  public ResponseEntity<List<ColumnDTO>> getAllColumnsForBoard(@PathVariable String id) {
     List<ColumnDTO> columns = boardService.getAllColumnsForBoard(id);
 
     log.info("Successfully retrieved all columns for board with id: {}", id);
@@ -64,7 +64,7 @@ public class BoardController {
 
   @PutMapping("/{id}")
   public ResponseEntity<BoardDTO> updateBoardName(@Valid @RequestBody BoardDTO boardDTO,
-                                                  @PathVariable Long id) {
+                                                  @PathVariable String id) {
     BoardDTO updatedBoardDTO = boardService.updateBoardName(id, boardDTO);
 
     log.info("Successfully updated the board with id: {}", id);
@@ -72,7 +72,7 @@ public class BoardController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteBoard(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteBoard(@PathVariable String id) {
     boardService.deleteBoard(id);
 
     log.info("Successfully deleted the board with id: {}", id);

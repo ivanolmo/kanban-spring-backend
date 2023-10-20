@@ -1,8 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -17,8 +15,8 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Column {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column
   private String name;
@@ -42,7 +40,7 @@ public class Column {
   public static class Builder {
     private final Column column = new Column();
 
-    public Builder id(Long id) {
+    public Builder id(String id) {
       column.setId(id);
       return this;
     }

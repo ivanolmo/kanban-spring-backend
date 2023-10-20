@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ColumnDTO {
-  private Long id;
+  private String id;
 
   @NotBlank(message = "Column name cannot be blank")
   @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")

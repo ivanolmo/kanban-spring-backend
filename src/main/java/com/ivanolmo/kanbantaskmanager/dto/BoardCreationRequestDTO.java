@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class BoardCreationRequestDTO {
   @Valid
   private BoardDTO board;
-  private Long userId;
+  private String userId;
 }

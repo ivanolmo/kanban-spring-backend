@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class ColumnCreationRequestDTO {
   @Valid
   private ColumnDTO column;
-  private Long boardId;
+  private String boardId;
 }

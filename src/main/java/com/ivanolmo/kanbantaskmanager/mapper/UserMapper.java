@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
-import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.dto.UserDTO;
+import com.ivanolmo.kanbantaskmanager.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,7 +10,6 @@ public class UserMapper {
     UserDTO userDTO = new UserDTO();
 
     userDTO.setId(user.getId());
-    userDTO.setName(user.getName());
     userDTO.setEmail(user.getEmail());
 
     return userDTO;

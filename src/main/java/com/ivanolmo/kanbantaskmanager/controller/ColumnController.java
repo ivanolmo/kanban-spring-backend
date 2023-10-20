@@ -29,7 +29,7 @@ public class ColumnController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ColumnDTO> updateColumnName(@Valid @RequestBody ColumnDTO columnDTO,
-                                                    @PathVariable Long id) {
+                                                    @PathVariable String id) {
     ColumnDTO updatedColumnDTO = columnService.updateColumnName(id, columnDTO);
 
     log.info("Successfully updated the column with id: {}", id);
@@ -37,7 +37,7 @@ public class ColumnController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteColumn(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteColumn(@PathVariable String id) {
     columnService.deleteColumn(id);
 
     log.info("Successfully deleted the column with id: {}", id);

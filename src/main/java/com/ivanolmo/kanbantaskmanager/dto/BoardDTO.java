@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class BoardDTO {
-  private Long id;
+  private String id;
 
   @NotBlank(message = "Board name cannot be blank")
   @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")

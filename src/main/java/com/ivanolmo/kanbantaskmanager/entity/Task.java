@@ -1,8 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,8 +16,8 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Task {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column(nullable = false)
   private String title;
@@ -45,7 +43,7 @@ public class Task {
   public static class Builder {
     private final Task task = new Task();
 
-    public Builder id(Long id) {
+    public Builder id(String id) {
       task.setId(id);
       return this;
     }

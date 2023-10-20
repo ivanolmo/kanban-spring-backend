@@ -30,7 +30,7 @@ public class SubtaskController {
 
   @PutMapping("/{id}")
   public ResponseEntity<SubtaskDTO> updateSubtask(@Valid @RequestBody SubtaskDTO subtaskDTO,
-                                                  @PathVariable Long id) {
+                                                  @PathVariable String id) {
     SubtaskDTO updatedSubtaskDTO = subtaskService.updateSubtask(id, subtaskDTO);
 
     log.info("Successfully updated the subtask with id: {}", id);
@@ -38,7 +38,7 @@ public class SubtaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteSubtask(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteSubtask(@PathVariable String id) {
     subtaskService.deleteSubtask(id);
 
     log.info("Successfully deleted the subtask with id: {}", id);

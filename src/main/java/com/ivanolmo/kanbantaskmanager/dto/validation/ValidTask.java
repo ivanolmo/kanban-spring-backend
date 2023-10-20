@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = TaskValidator.class)
 public @interface ValidTask {
   String message() default "Title and/or description must be present";
+
   Class<?>[] groups() default {};
+
   Class<? extends Payload>[] payload() default {};
 }

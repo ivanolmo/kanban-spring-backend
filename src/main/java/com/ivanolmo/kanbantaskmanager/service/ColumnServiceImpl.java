@@ -30,7 +30,7 @@ public class ColumnServiceImpl implements ColumnService {
 
   // create board column
   @Transactional
-  public ColumnDTO addColumnToBoard(Long boardId, ColumnDTO columnDTO) {
+  public ColumnDTO addColumnToBoard(String boardId, ColumnDTO columnDTO) {
     // get board, throw error if not found
     Board board = boardRepository.findById(boardId)
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
@@ -59,7 +59,7 @@ public class ColumnServiceImpl implements ColumnService {
 
   // update column
   @Transactional
-  public ColumnDTO updateColumnName(Long id, ColumnDTO columnDTO) {
+  public ColumnDTO updateColumnName(String id, ColumnDTO columnDTO) {
     // get column by id or else throw exception
     Column column = columnRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
@@ -95,7 +95,7 @@ public class ColumnServiceImpl implements ColumnService {
 
   // delete column
   @Transactional
-  public void deleteColumn(Long id) {
+  public void deleteColumn(String id) {
     // delete column or throw error if column not found
     try {
       columnRepository.deleteById(id);
