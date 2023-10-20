@@ -269,9 +269,8 @@ public class ColumnServiceImplTest {
     doThrow(new RuntimeException("Error")).when(columnRepository).delete(any(Column.class));
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () -> {
-      columnService.deleteColumn(columnId);
-    });
+    Exception exception = assertThrows(EntityOperationException.class, () ->
+        columnService.deleteColumn(columnId));
     assertEquals("There was an error deleting this column.", exception.getMessage());
   }
 }
