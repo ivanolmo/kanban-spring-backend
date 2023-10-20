@@ -64,8 +64,15 @@ public class ColumnServiceImpl implements ColumnService {
     Column column = columnRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
 
-    // get board that this column belongs to
-    String boardId = column.getBoard().getId();
+    // get board that this column belongs to or else throw exception
+    // an error being thrown here would signify a data integrity issue
+    Board board = column.getBoard();
+
+    if (board == null) {
+      throw new EntityOperationException("Board", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Long boardId = board.getId();
 
     // if column name already exists for this board, throw error
     columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
