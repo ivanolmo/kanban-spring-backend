@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -78,7 +79,7 @@ public class ColumnServiceImplTest {
     // then
     Exception exception = assertThrows(EntityOperationException.class, () ->
         columnService.addColumnToBoard(boardId, columnDTO));
-    assertEquals("Board not found.", exception.getMessage());
+    assertEquals("Board read operation failed", exception.getMessage());
   }
 
   @Test
@@ -104,7 +105,7 @@ public class ColumnServiceImplTest {
     // then
     Exception exception = assertThrows(EntityOperationException.class, () ->
         columnService.addColumnToBoard(boardId, columnDTO));
-    assertEquals("Failed to create the column.", exception.getMessage());
+    assertEquals("Column create operation failed", exception.getMessage());
 
     // check interactions
     verify(columnRepository).save(any(Column.class));
@@ -160,7 +161,7 @@ public class ColumnServiceImplTest {
     // then
     Exception exception = assertThrows(EntityOperationException.class, () ->
         columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("Column not found.", exception.getMessage());
+    assertEquals("Column read operation failed", exception.getMessage());
   }
 
   @Test
@@ -176,7 +177,7 @@ public class ColumnServiceImplTest {
     // then
     Exception exception = assertThrows(EntityOperationException.class, () ->
         columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("Board not found for this column.", exception.getMessage());
+    assertEquals("Board read operation failed", exception.getMessage());
   }
 
   @Test
@@ -228,49 +229,59 @@ public class ColumnServiceImplTest {
     // then
     Exception exception = assertThrows(EntityOperationException.class, () ->
         columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("There was an error updating this column.", exception.getMessage());
+    assertEquals("Column update operation failed", exception.getMessage());
   }
 
   @Test
   public void testDeleteColumn() {
     // given
-    Column column = new Column();
     Long columnId = 1L;
-    column.setId(columnId);
-    column.setName("Test Column");
-
-    ColumnDTO columnDTO = new ColumnDTO();
-    columnDTO.setId(column.getId());
-    columnDTO.setName(column.getName());
 
     // when
-    when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
-    when(columnMapper.toDTO(column)).thenReturn(columnDTO);
+    doNothing().when(columnRepository).deleteById(columnId);
 
     // then
-//    ColumnDTO result = columnService.deleteColumn(columnId);
-//    assertNotNull(result);
-//    assertEquals(columnId, result.getId());
+    columnService.deleteColumn(columnId);
 
     // check interactions
-    verify(columnRepository).findById(columnId);
-    verify(columnRepository).delete(column);
+    verify(columnRepository).deleteById(columnId);
   }
 
   @Test
-  public void testDeleteColumn_columnDeleteException() {
+  public void testDeleteColumn_columnNotFound() {
     // given
     Long columnId = 1L;
-    Column column = new Column();
-    column.setId(columnId);
 
     // when
-    when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
-    doThrow(new RuntimeException("Error")).when(columnRepository).delete(any(Column.class));
+    doThrow(EmptyResultDataAccessException.class).when(columnRepository).deleteById(columnId);
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.deleteColumn(columnId));
-    assertEquals("There was an error deleting this column.", exception.getMessage());
+    Exception exception = assertThrows(
+        EntityOperationException.class,
+        () -> columnService.deleteColumn(columnId)
+    );
+    assertEquals("Column delete operation failed", exception.getMessage());
+
+    // check interactions
+    verify(columnRepository).deleteById(columnId);
+  }
+
+  @Test
+  public void testDeleteColumn_unexpectedError() {
+    // given
+    Long columnId = 1L;
+
+    // when
+    doThrow(RuntimeException.class).when(columnRepository).deleteById(columnId);
+
+    // then
+    Exception exception = assertThrows(
+        EntityOperationException.class,
+        () -> columnService.deleteColumn(columnId)
+    );
+    assertEquals("Column delete operation failed", exception.getMessage());
+
+    // check interactions
+    verify(columnRepository).deleteById(columnId);
   }
 }
