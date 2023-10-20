@@ -3,7 +3,6 @@ package com.ivanolmo.kanbantaskmanager.service;
 import com.ivanolmo.kanbantaskmanager.config.JwtService;
 import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationResponseDTO;
-import com.ivanolmo.kanbantaskmanager.dto.auth.RegisterRequestDTO;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ public class AuthenticationService {
   private final UserRepository userRepository;
   private final JwtService jwtService;
 
-  public AuthenticationResponseDTO register(RegisterRequestDTO request) {
+  public AuthenticationResponseDTO register(AuthenticationRequestDTO request) {
     User user = User
         .builder()
         .email(request.getEmail())
