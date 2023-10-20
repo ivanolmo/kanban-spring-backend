@@ -43,8 +43,7 @@ public class ColumnServiceImplTest {
     columnDTO.setName("New Column");
 
     Board board = new Board();
-    String boardId = "board";
-    board.setId(boardId);
+    board.setId("board");
     board.setName("Test Board");
 
     Column column = new Column();
@@ -55,17 +54,17 @@ public class ColumnServiceImplTest {
     returnedColumnDTO.setName("New Column");
 
     // when
-    when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
     when(columnMapper.toEntity(columnDTO)).thenReturn(column);
     when(columnRepository.save(any(Column.class))).thenReturn(column);
     when(columnMapper.toDTO(column)).thenReturn(returnedColumnDTO);
 
     // then
-    ColumnDTO result = columnService.addColumnToBoard(boardId, columnDTO);
-    assertNotNull(result);
-    assertEquals("New Column", result.getName());
+    ColumnDTO result = columnService.addColumnToBoard(board.getId(), columnDTO);
+    assertNotNull(result, "Column DTO should not be null");
+    assertEquals("New Column", result.getName(), "Column name should match");
 
-    // check interactions
+    // verify interactions
     verify(columnRepository).save(any(Column.class));
   }
 
@@ -79,20 +78,18 @@ public class ColumnServiceImplTest {
     when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.addColumnToBoard(boardId, columnDTO));
-    assertEquals("Board read operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class, () -> columnService.addColumnToBoard(boardId, columnDTO));
+    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testAddColumnToBoard_columnCreationException() {
     // given
     ColumnDTO columnDTO = new ColumnDTO();
-    columnDTO.setName("");
+    columnDTO.setName(""); // fails validation
 
     Board board = new Board();
-    String boardId = "board";
-    board.setId(boardId);
+    board.setId("board");
     board.setName("Test Board");
 
     Column column = new Column();
@@ -100,54 +97,75 @@ public class ColumnServiceImplTest {
     column.setBoard(board);
 
     // when
-    when(boardRepository.findById(boardId)).thenReturn(Optional.of(board));
+    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
     when(columnMapper.toEntity(columnDTO)).thenReturn(column);
     doThrow(new RuntimeException("Error")).when(columnRepository).save(any(Column.class));
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.addColumnToBoard(boardId, columnDTO));
-    assertEquals("Column create operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.addColumnToBoard(board.getId(), columnDTO));
+    assertEquals("Column create operation failed", e.getMessage(), "The exception message should match");
 
-    // check interactions
+    // verify interactions
     verify(columnRepository).save(any(Column.class));
+  }
+
+  @Test
+  public void testAddColumnToBoard_columnAlreadyExistsException() {
+    // given
+    ColumnDTO columnDTO = new ColumnDTO();
+    columnDTO.setName("Existing Column");
+
+    Board board = new Board();
+    board.setId("board");
+
+    Column column = new Column();
+    column.setName(columnDTO.getName());
+    column.setBoard(board);
+
+    // when
+    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
+    when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.of(column));
+
+    // then
+    EntityOperationException e = assertThrows(EntityOperationException.class,
+        () -> columnService.addColumnToBoard(board.getId(), columnDTO));
+    assertEquals("A column with that name already exists", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateColumnName() {
     // given
-    String columnId = "column";
-    String newName = "Updated Column Name";
     ColumnDTO columnDTO = new ColumnDTO();
-    columnDTO.setName(newName);
+    columnDTO.setName("Updated Column Name");
+
+    Column existingColumn = new Column();
+    existingColumn.setId("column");
+    existingColumn.setName("Existing Column Name");
 
     Board board = new Board();
-    String boardId = "board";
-    board.setId(boardId);
-    board.setName("Test Board");
+    board.setId("board");
+    existingColumn.setBoard(board);
 
-    Column column = new Column();
-    column.setId(columnId);
-    column.setName("Old Column Name");
-    column.setBoard(board);
-
-    ColumnDTO updatedColumnDTO = new ColumnDTO();
-    updatedColumnDTO.setName(newName);
+    Column updatedColumn = new Column();
+    updatedColumn.setId(existingColumn.getId());
+    updatedColumn.setName(columnDTO.getName());
+    updatedColumn.setBoard(board);
 
     // when
-    when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
-    when(columnRepository.findByNameAndBoardId(newName, boardId)).thenReturn(Optional.empty());
-    when(columnRepository.save(any(Column.class))).thenReturn(column);
-    when(columnMapper.toDTO(any(Column.class))).thenReturn(updatedColumnDTO);
+    when(columnRepository.findById(existingColumn.getId())).thenReturn(Optional.of(existingColumn));
+    when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.empty());
+    when(columnRepository.save(any(Column.class))).thenReturn(updatedColumn);
+    when(columnMapper.toDTO(updatedColumn)).thenReturn(columnDTO);
 
     // then
-    ColumnDTO result = columnService.updateColumnName(columnId, columnDTO);
-    assertNotNull(result);
-    assertEquals(newName, result.getName());
+    ColumnDTO result = columnService.updateColumnName(existingColumn.getId(), columnDTO);
+    assertNotNull(result, "Column DTO should not be null");
+    assertEquals(columnDTO.getName(), result.getName(), "Column name should match");
 
-    // check interactions
-    verify(columnRepository).findById(columnId);
-    verify(columnRepository).findByNameAndBoardId(newName, boardId);
+    // verify interactions
+    verify(columnRepository).findById(existingColumn.getId());
+    verify(columnRepository).findByNameAndBoardId(columnDTO.getName(), board.getId());
     verify(columnRepository).save(any(Column.class));
   }
 
@@ -161,9 +179,9 @@ public class ColumnServiceImplTest {
     when(columnRepository.findById(columnId)).thenReturn(Optional.empty());
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("Column read operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.updateColumnName(columnId, columnDTO));
+    assertEquals("Column read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
@@ -177,61 +195,57 @@ public class ColumnServiceImplTest {
     when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("Board read operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.updateColumnName(columnId, columnDTO));
+    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateColumnName_columnAlreadyExistsException() {
     // given
-    String columnId = "column";
-    String newName = "Updated Column Name";
     ColumnDTO columnDTO = new ColumnDTO();
-    columnDTO.setName(newName);
+    columnDTO.setName("Duplicate Board Name");
 
     Board board = new Board();
-    String boardId = "board";
-    board.setId(boardId);
+    board.setId("board");
 
-    Column column = new Column();
-    column.setId(columnId);
-    column.setBoard(board);
+    Column existingColumn = new Column();
+    existingColumn.setId("column");
+    existingColumn.setBoard(board);
 
     // when
-    when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
-    when(columnRepository.findByNameAndBoardId(newName, boardId)).thenReturn(Optional.of(new Column()));
+    when(columnRepository.findById(existingColumn.getId())).thenReturn(Optional.of(existingColumn));
+    when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.of(existingColumn));
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("A column with that name already exists.", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.updateColumnName(existingColumn.getId(), columnDTO));
+    assertEquals("A column with that name already exists", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateColumnName_columnUpdateException() {
     // given
-    String columnId = "column";
     ColumnDTO columnDTO = new ColumnDTO();
     columnDTO.setName("Updated Name");
 
     Column column = new Column();
-    column.setId(columnId);
-    column.setName("Old Name");
+    column.setId("column");
+    column.setName("Existing Name");
+
     Board board = new Board();
-    String boardId = "board";
-    board.setId(boardId);
+    board.setId("board");
     column.setBoard(board);
 
     // when
-    when(columnRepository.findById(columnId)).thenReturn(Optional.of(column));
-    when(columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)).thenReturn(Optional.empty());
-    when(columnRepository.save(any(Column.class))).thenThrow(new RuntimeException("Error"));
+    when(columnRepository.findById(column.getId())).thenReturn(Optional.of(column));
+    when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.empty());
+    doThrow(new RuntimeException("Error")).when(columnRepository).save(any(Column.class));
 
     // then
-    Exception exception = assertThrows(EntityOperationException.class, () ->
-        columnService.updateColumnName(columnId, columnDTO));
-    assertEquals("Column update operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.updateColumnName(column.getId(), columnDTO));
+    assertEquals("Column update operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
@@ -245,7 +259,7 @@ public class ColumnServiceImplTest {
     // then
     columnService.deleteColumn(columnId);
 
-    // check interactions
+    // verify interactions
     verify(columnRepository).deleteById(columnId);
   }
 
@@ -258,18 +272,16 @@ public class ColumnServiceImplTest {
     doThrow(EmptyResultDataAccessException.class).when(columnRepository).deleteById(columnId);
 
     // then
-    Exception exception = assertThrows(
-        EntityOperationException.class,
-        () -> columnService.deleteColumn(columnId)
-    );
-    assertEquals("Column delete operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.deleteColumn(columnId));
+    assertEquals("Column delete operation failed", e.getMessage(), "The exception message should match");
 
-    // check interactions
+    // verify interactions
     verify(columnRepository).deleteById(columnId);
   }
 
   @Test
-  public void testDeleteColumn_unexpectedError() {
+  public void testDeleteColumn_columnDeleteException() {
     // given
     String columnId = "column";
 
@@ -277,13 +289,11 @@ public class ColumnServiceImplTest {
     doThrow(RuntimeException.class).when(columnRepository).deleteById(columnId);
 
     // then
-    Exception exception = assertThrows(
-        EntityOperationException.class,
-        () -> columnService.deleteColumn(columnId)
-    );
-    assertEquals("Column delete operation failed", exception.getMessage());
+    Exception e = assertThrows(EntityOperationException.class,
+        () -> columnService.deleteColumn(columnId));
+    assertEquals("Column delete operation failed", e.getMessage(), "The exception message should match");
 
-    // check interactions
+    // verify interactions
     verify(columnRepository).deleteById(columnId);
   }
 }
