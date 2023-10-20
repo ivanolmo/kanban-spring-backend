@@ -1,8 +1,8 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
-import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;

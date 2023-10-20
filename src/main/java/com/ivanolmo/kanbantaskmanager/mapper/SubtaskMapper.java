@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
-import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,7 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 
 import java.util.List;
 

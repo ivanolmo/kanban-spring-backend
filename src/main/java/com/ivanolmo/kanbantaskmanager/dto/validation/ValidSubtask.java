@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = SubtaskValidator.class)
 public @interface ValidSubtask {
   String message() default "Title and/or completed must be present";
+
   Class<?>[] groups() default {};
+
   Class<? extends Payload>[] payload() default {};
 }

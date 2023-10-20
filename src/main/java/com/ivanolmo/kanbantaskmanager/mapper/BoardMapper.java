@@ -1,10 +1,10 @@
 package com.ivanolmo.kanbantaskmanager.mapper;
 
-import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.entity.Board;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
