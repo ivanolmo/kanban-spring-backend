@@ -38,6 +38,3 @@ out/
 
 ### env ###
 .env
-
-### config ###
-application-dev.yml
