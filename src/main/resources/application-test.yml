@@ -1,6 +1,6 @@
 security:
   jwt:
-    secret-key: ${JWT_TEST_SECRET_KEY}
+    secret-key: ${JWT_SECRET_KEY_TEST}
     expiration-time: 86400000
 spring:
   datasource:
