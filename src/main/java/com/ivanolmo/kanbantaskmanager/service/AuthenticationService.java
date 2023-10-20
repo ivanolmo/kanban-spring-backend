@@ -25,10 +25,13 @@ public class AuthenticationService {
         .email(request.getEmail())
         .password(passwordEncoder.encode(request.getPassword()))
         .build();
+
     userRepository.save(user);
 
     return AuthenticationResponseDTO
         .builder()
+        .userId(user.getId())
+        .email(user.getEmail())
         .accessToken(jwtService.generateToken(user))
         .build();
   }

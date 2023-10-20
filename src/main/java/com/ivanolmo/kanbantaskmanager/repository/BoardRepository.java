@@ -8,9 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface BoardRepository extends JpaRepository<Board, Long> {
-  Optional<List<Board>> findByUserId(Long userId);
+public interface BoardRepository extends JpaRepository<Board, String> {
+  Optional<List<Board>> findByUserId(String userId);
 
   @Query("SELECT b FROM Board b WHERE LOWER(b.name) = LOWER(:name) AND b.user.id = :userId")
-  Optional<Board> findByNameAndUserId(@Param("name") String name, @Param("userId") Long userId);
+  Optional<Board> findByNameAndUserId(@Param("name") String name, @Param("userId") String userId);
 }

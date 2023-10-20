@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @ValidSubtask
 public class SubtaskDTO {
-  private Long id;
+  private String id;
 
   private String title;
 

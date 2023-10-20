@@ -25,8 +25,8 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column(unique = true, nullable = false)
   private String email;

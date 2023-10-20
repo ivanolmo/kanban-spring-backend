@@ -30,7 +30,7 @@ public class TaskServiceImpl implements TaskService {
 
   // create task
   @Transactional
-  public TaskDTO addTaskToColumn(Long columnId, TaskDTO taskDTO) {
+  public TaskDTO addTaskToColumn(String columnId, TaskDTO taskDTO) {
     // get column, throw error if not found
     Column column = columnRepository.findById(columnId)
         .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
@@ -59,13 +59,13 @@ public class TaskServiceImpl implements TaskService {
 
   // update task
   @Transactional
-  public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
+  public TaskDTO updateTask(String id, TaskDTO taskDTO) {
     // get task by id or else throw exception
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
     // get column that this task belongs to
-    Long columnId = task.getColumn().getId();
+    String columnId = task.getColumn().getId();
 
     // check incoming dto for a title
     // this check is in place to prevent issues when a user only wants to update one task value
@@ -101,7 +101,7 @@ public class TaskServiceImpl implements TaskService {
 
   // delete task
   @Transactional
-  public void deleteTask(Long id) {
+  public void deleteTask(String id) {
     // delete task or throw error if task not found
     try {
       taskRepository.deleteById(id);

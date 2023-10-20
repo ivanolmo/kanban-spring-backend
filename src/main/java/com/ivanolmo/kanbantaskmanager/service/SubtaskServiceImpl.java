@@ -30,7 +30,7 @@ public class SubtaskServiceImpl implements SubtaskService {
 
   // create subtask
   @Transactional
-  public SubtaskDTO addSubtaskToTask(Long taskId, SubtaskDTO subtaskDTO) {
+  public SubtaskDTO addSubtaskToTask(String taskId, SubtaskDTO subtaskDTO) {
     // get task, throw error if not found
     Task task = taskRepository.findById(taskId)
         .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
@@ -59,13 +59,13 @@ public class SubtaskServiceImpl implements SubtaskService {
 
   // update subtask
   @Transactional
-  public SubtaskDTO updateSubtask(Long id, SubtaskDTO subtaskDTO) {
+  public SubtaskDTO updateSubtask(String id, SubtaskDTO subtaskDTO) {
     // get subtask by id or else throw exception
     Subtask subtask = subtaskRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
 
     // get task that this subtask belongs to
-    Long taskId = subtask.getTask().getId();
+    String taskId = subtask.getTask().getId();
 
     // check incoming dto for a title
     // this check is in place to prevent issues when a user only wants to update one subtask value
@@ -100,7 +100,7 @@ public class SubtaskServiceImpl implements SubtaskService {
 
   // delete subtask
   @Transactional
-  public void deleteSubtask(Long id) {
+  public void deleteSubtask(String id) {
     // delete task or throw error if task not found
     try {
       subtaskRepository.deleteById(id);

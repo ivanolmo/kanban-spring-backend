@@ -19,8 +19,8 @@ import java.util.Optional;
 @EntityListeners(AuditingEntityListener.class)
 public class Board {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column(nullable = false)
   private String name;
@@ -49,7 +49,7 @@ public class Board {
   public static class Builder {
     private final Board board = new Board();
 
-    public Builder id(Long id) {
+    public Builder id(String id) {
       board.setId(id);
       return this;
     }

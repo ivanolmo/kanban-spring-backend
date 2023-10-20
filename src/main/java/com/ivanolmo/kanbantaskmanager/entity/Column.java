@@ -17,8 +17,8 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class Column {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column
   private String name;
@@ -42,7 +42,7 @@ public class Column {
   public static class Builder {
     private final Column column = new Column();
 
-    public Builder id(Long id) {
+    public Builder id(String id) {
       column.setId(id);
       return this;
     }

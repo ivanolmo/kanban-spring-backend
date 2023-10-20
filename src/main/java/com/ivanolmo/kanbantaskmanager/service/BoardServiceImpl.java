@@ -43,7 +43,7 @@ public class BoardServiceImpl implements BoardService {
 
   // get all boards for a user
   @Transactional(readOnly = true)
-  public List<BoardDTO> getAllUserBoards(Long userId) {
+  public List<BoardDTO> getAllUserBoards(String userId) {
     // find user by id or else throw exception
     if (!userRepository.existsById(userId)) {
       throw new EntityOperationException("User", "read", HttpStatus.NOT_FOUND);
@@ -60,7 +60,7 @@ public class BoardServiceImpl implements BoardService {
 
   // get board by id
   @Transactional(readOnly = true)
-  public BoardDTO getBoardById(Long id) {
+  public BoardDTO getBoardById(String id) {
     // get board by id or else throw exception
     Board board = boardRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
@@ -70,7 +70,7 @@ public class BoardServiceImpl implements BoardService {
   }
 
   @Transactional(readOnly = true)
-  public List<ColumnDTO> getAllColumnsForBoard(Long boardId) {
+  public List<ColumnDTO> getAllColumnsForBoard(String boardId) {
     // find board by id or else throw exception
     if (!boardRepository.existsById(boardId)) {
       throw new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND);
@@ -87,7 +87,7 @@ public class BoardServiceImpl implements BoardService {
   }
 
   @Transactional
-  public BoardDTO addBoardToUser(Long userId, BoardDTO boardDTO) {
+  public BoardDTO addBoardToUser(String userId, BoardDTO boardDTO) {
     // get user, throw error if not found
     User user =
         userRepository.findById(userId)
@@ -117,13 +117,13 @@ public class BoardServiceImpl implements BoardService {
 
   // update board
   @Transactional
-  public BoardDTO updateBoardName(Long id, BoardDTO boardDTO) {
+  public BoardDTO updateBoardName(String id, BoardDTO boardDTO) {
     // get board by id or else throw exception
     Board board = boardRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
     // get user that this board belongs to
-    Long userId = board.getUser().getId();
+    String userId = board.getUser().getId();
 
     // if board name already exists for this user, throw error
     boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
@@ -146,7 +146,7 @@ public class BoardServiceImpl implements BoardService {
 
   // delete board
   @Transactional
-  public void deleteBoard(Long id) {
+  public void deleteBoard(String id) {
     // delete board or throw error if board not found
     try {
       boardRepository.deleteById(id);

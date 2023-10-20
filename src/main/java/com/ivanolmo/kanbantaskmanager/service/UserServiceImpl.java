@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(user);
   }
 
-  public User getUserById(Long id) {
+  public User getUserById(String id) {
     return userRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("User", "read", HttpStatus.NOT_FOUND));
   }

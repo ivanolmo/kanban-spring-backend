@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class TaskCreationRequestDTO {
   @Valid
   private TaskDTO task;
-  private Long columnId;
+  private String columnId;
 }

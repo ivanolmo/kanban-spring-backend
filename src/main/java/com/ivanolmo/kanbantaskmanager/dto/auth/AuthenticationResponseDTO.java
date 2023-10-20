@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthenticationResponseDTO {
   @JsonProperty("user_id")
-  private Long userId;
+  private String userId;
 
   @JsonProperty("email")
   private String email;

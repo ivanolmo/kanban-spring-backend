@@ -7,8 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskRepository extends JpaRepository<Task, String> {
   @Query("SELECT t FROM Task t WHERE LOWER(t.title) = LOWER(:title) AND t.column.id = :columnId")
   Optional<Task> findByTitleAndColumnId(@Param("title") String title,
-                                        @Param("columnId") Long columnId);
+                                        @Param("columnId") String columnId);
 }

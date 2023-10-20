@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class SubtaskCreationRequestDTO {
   @Valid
   private SubtaskDTO subtask;
-  private Long taskId;
+  private String taskId;
 }

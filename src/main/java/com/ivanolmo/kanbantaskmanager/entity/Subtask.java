@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class Subtask {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @jakarta.persistence.Column(name = "title", nullable = false)
   private String title;
@@ -38,7 +38,7 @@ public class Subtask {
   public static class Builder {
     private final Subtask subtask = new Subtask();
 
-    public Builder id(Long id) {
+    public Builder id(String id) {
       subtask.setId(id);
       return this;
     }

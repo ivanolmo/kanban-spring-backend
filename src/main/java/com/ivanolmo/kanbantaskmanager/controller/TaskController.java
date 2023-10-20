@@ -29,7 +29,7 @@ public class TaskController {
 
   @PutMapping("/{id}")
   public ResponseEntity<TaskDTO> updateTask(@Valid @RequestBody TaskDTO taskDTO,
-                                            @PathVariable Long id) {
+                                            @PathVariable String id) {
     TaskDTO updatedTaskDTO = taskService.updateTask(id, taskDTO);
 
     log.info("Successfully updated the task with id: {}", id);
@@ -37,7 +37,7 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteTask(@PathVariable String id) {
     taskService.deleteTask(id);
 
     log.info("Successfully deleted the task with id: {}", id);

@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @ValidTask
 public class TaskDTO {
-  private Long id;
+  private String id;
 
   private String title;
 
