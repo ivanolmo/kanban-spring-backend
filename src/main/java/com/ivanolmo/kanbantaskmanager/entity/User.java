@@ -43,6 +43,7 @@ public class User implements UserDetails {
   private LocalDateTime updatedAt;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<Board> boards = new ArrayList<>();
 
   @Override
