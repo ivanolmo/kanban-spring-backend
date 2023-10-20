@@ -19,5 +19,8 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Set execute permission for Gradlew
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
         run: ./gradlew build
