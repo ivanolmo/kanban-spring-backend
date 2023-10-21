@@ -1,7 +1,10 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,6 +13,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "columns")
 @EntityListeners(AuditingEntityListener.class)
@@ -35,6 +41,10 @@ public class Column {
 
   @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Task> tasks;
+
+  public Column(String id) {
+    this.id = id;
+  }
 
   // custom Builder class for dto -> entity conversion
   public static class Builder {
