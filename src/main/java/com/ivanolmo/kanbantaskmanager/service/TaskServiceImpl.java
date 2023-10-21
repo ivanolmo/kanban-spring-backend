@@ -38,7 +38,7 @@ public class TaskServiceImpl implements TaskService {
     // if new task title already exists for this column, throw error
     taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
         .ifPresent(existingTask -> {
-          throw new EntityOperationException("A task with that title already exists.",
+          throw new EntityOperationException("A task with that title already exists",
               HttpStatus.CONFLICT);
         });
 
@@ -64,17 +64,22 @@ public class TaskServiceImpl implements TaskService {
     Task task = taskRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
-    // get column that this task belongs to
-    String columnId = task.getColumn().getId();
+    // get column that this task belongs to or else throw exception
+    // an error being thrown here would signify a data integrity issue
+    Column column = task.getColumn();
+
+    if (column == null) {
+      throw new EntityOperationException("Column", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // check incoming dto for a title
     // this check is in place to prevent issues when a user only wants to update one task value
     if (taskDTO.getTitle() != null) {
       // check if the new task title is the same as any existing task title for this column
       // if match is found throw exception
-      taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
+      taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), column.getId())
           .ifPresent(existingTask -> {
-            throw new EntityOperationException("A task with that title already exists.",
+            throw new EntityOperationException("A task with that title already exists",
                 HttpStatus.CONFLICT);
           });
 
