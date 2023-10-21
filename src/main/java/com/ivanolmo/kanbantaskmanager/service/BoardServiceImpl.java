@@ -79,7 +79,6 @@ public class BoardServiceImpl implements BoardService {
     // get board columns
     List<Column> columns = columnRepository.findAllByBoardId(boardId).orElse(Collections.emptyList());
 
-
     // map columns to DTOs and return as list
     return columns.stream()
         .map(columnMapper::toDTO)

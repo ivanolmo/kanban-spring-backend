@@ -1,11 +1,15 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
+import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
+import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
+import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +21,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,11 +38,134 @@ public class BoardServiceTest {
   @MockBean
   private UserRepository userRepository;
   @MockBean
+  private ColumnRepository columnRepository;
+  @MockBean
   private BoardMapper boardMapper;
+  @MockBean
+  private ColumnMapper columnMapper;
   @Autowired
   private BoardService boardService;
 
-  public BoardServiceTest() {
+  @Test
+  public void testGetAllUserBoards() {
+    // given
+    String userId = "user";
+    Board board1 = new Board();
+    Board board2 = new Board();
+    Board board3 = new Board();
+    List<Board> userBoards = Arrays.asList(board1, board2, board3);
+
+    BoardDTO boardDTO1 = new BoardDTO();
+    BoardDTO boardDTO2 = new BoardDTO();
+    BoardDTO boardDTO3 = new BoardDTO();
+    List<BoardDTO> returnedBoardDTOs = Arrays.asList(boardDTO1, boardDTO2, boardDTO3);
+
+    // when
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(boardRepository.findByUserId(userId)).thenReturn(Optional.of(userBoards));
+    when(boardMapper.toDTO(board1)).thenReturn(boardDTO1);
+    when(boardMapper.toDTO(board2)).thenReturn(boardDTO2);
+    when(boardMapper.toDTO(board3)).thenReturn(boardDTO3);
+
+    // then
+    List<BoardDTO> result = boardService.getAllUserBoards(userId);
+    assertNotNull(result, "Result should not be null");
+    assertEquals(returnedBoardDTOs.size(), result.size(), "The number of boards should match");
+    assertEquals(boardDTO1, result.get(0), "The BoardDTO instances should match");
+    assertEquals(boardDTO2, result.get(1), "The BoardDTO instances should match");
+    assertEquals(boardDTO3, result.get(2), "The BoardDTO instances should match");
+  }
+
+  @Test
+  public void testGetAllUserBoards_userNotFoundException() {
+    // given
+    String userId = "user";
+
+    // when
+    when(userRepository.existsById(userId)).thenReturn(false);
+
+    // then
+    EntityOperationException e = assertThrows(EntityOperationException.class,
+        () -> boardService.getAllUserBoards(userId));
+    assertEquals("User read operation failed", e.getMessage(), "The exception message should match");
+  }
+
+  @Test
+  public void testGetBoardById() {
+    // given
+    Board board = new Board();
+    board.setId("board");
+
+    BoardDTO boardDTO = new BoardDTO();
+    boardDTO.setId(board.getId());
+
+    // when
+    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
+    when(boardMapper.toDTO(any(Board.class))).thenReturn(boardDTO);
+
+    // then
+    BoardDTO result = boardService.getBoardById(board.getId());
+    assertNotNull(result, "Result should not be null");
+    assertEquals(board.getId(), result.getId(), "The board IDs should be the same");
+  }
+
+  @Test
+  public void testGetBoardById_boardNotFoundException() {
+    // given
+    String boardId = "board";
+
+    // when
+    when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
+
+    // then
+    EntityOperationException e = assertThrows(EntityOperationException.class,
+        () -> boardService.getBoardById(boardId));
+    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
+  }
+
+  @Test
+  public void testGetAllColumnsForBoard() {
+    // given
+    String boardId = "board";
+    Column column1 = new Column();
+    Column column2 = new Column();
+    Column column3 = new Column();
+    List<Column> boardColumns = Arrays.asList(column1, column2, column3);
+
+    ColumnDTO columnDTO1 = new ColumnDTO();
+    ColumnDTO columnDTO2 = new ColumnDTO();
+    ColumnDTO columnDTO3 = new ColumnDTO();
+
+    // when
+    when(boardRepository.existsById(boardId)).thenReturn(true);
+    when(columnRepository.findAllByBoardId(boardId)).thenReturn(Optional.of(boardColumns));
+    when(columnMapper.toDTO(column1)).thenReturn(columnDTO1);
+    when(columnMapper.toDTO(column2)).thenReturn(columnDTO2);
+    when(columnMapper.toDTO(column3)).thenReturn(columnDTO3);
+
+    // then
+    List<ColumnDTO> result = boardService.getAllColumnsForBoard(boardId);
+    assertNotNull(result, "Result should not null");
+    assertEquals(boardColumns.size(), result.size(), "The number of columns should match");
+
+    // Compare values instead of instances
+    assertEquals(columnDTO1, result.get(0), "The ColumnDTO instances should match");
+    assertEquals(columnDTO2, result.get(1), "The ColumnDTO instances should match");
+    assertEquals(columnDTO3, result.get(2), "The ColumnDTO instances should match");
+  }
+
+  @Test
+  public void testGetAllColumnsForBoard_boardNotFoundException() {
+    // given
+    String boardId = "board";
+
+    // when
+    when(boardRepository.existsById(boardId)).thenReturn(false);
+
+    // then
+    EntityOperationException e = assertThrows(EntityOperationException.class,
+        () -> boardService.getBoardById(boardId));
+    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
