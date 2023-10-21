@@ -2,7 +2,10 @@ package com.ivanolmo.kanbantaskmanager.entity;
 
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,6 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "boards")
 @EntityListeners(AuditingEntityListener.class)
@@ -34,6 +40,7 @@ public class Board {
   private LocalDateTime updatedAt;
 
   @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+  @lombok.Builder.Default
   private List<Column> columns = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)

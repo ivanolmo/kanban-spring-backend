@@ -17,10 +17,10 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {

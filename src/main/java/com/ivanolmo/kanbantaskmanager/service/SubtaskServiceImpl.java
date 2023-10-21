@@ -38,7 +38,7 @@ public class SubtaskServiceImpl implements SubtaskService {
     // if new task title already exists for this column, throw error
     subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
         .ifPresent(existingSubtask -> {
-          throw new EntityOperationException("A subtask with that title already exists.",
+          throw new EntityOperationException("A subtask with that title already exists",
               HttpStatus.CONFLICT);
         });
 
@@ -64,16 +64,21 @@ public class SubtaskServiceImpl implements SubtaskService {
     Subtask subtask = subtaskRepository.findById(id)
         .orElseThrow(() -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
 
-    // get task that this subtask belongs to
-    String taskId = subtask.getTask().getId();
+    // get task that this subtask belongs to or else throw exception
+    // an error being thrown here would signify a data integrity issue
+    Task task = subtask.getTask();
+
+    if (task == null) {
+      throw new EntityOperationException("Task", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // check incoming dto for a title
     // this check is in place to prevent issues when a user only wants to update one subtask value
     if (subtaskDTO.getTitle() != null) {
       // check if the new subtask title is the same as any existing subtask title for this task
-      subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
+      subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), task.getId())
           .ifPresent(existingSubtask -> {
-            throw new EntityOperationException("A subtask with that title already exists.",
+            throw new EntityOperationException("A subtask with that title already exists",
                 HttpStatus.CONFLICT);
           });
 

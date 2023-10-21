@@ -38,7 +38,7 @@ public class ColumnServiceImpl implements ColumnService {
     // if new column name already exists for this board, throw error
     columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
         .ifPresent(existingColumn -> {
-          throw new EntityOperationException("A column with that name already exists.",
+          throw new EntityOperationException("A column with that name already exists",
               HttpStatus.CONFLICT);
         });
 
@@ -72,12 +72,10 @@ public class ColumnServiceImpl implements ColumnService {
       throw new EntityOperationException("Board", "read", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    String boardId = "board";
-
     // if column name already exists for this board, throw error
-    columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
+    columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())
         .ifPresent(existingColumn -> {
-          throw new EntityOperationException("A column with that name already exists.",
+          throw new EntityOperationException("A column with that name already exists",
               HttpStatus.CONFLICT);
         });
 
