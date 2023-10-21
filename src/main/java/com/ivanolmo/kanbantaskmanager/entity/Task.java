@@ -44,6 +44,7 @@ public class Task {
   private Column column;
 
   @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+  @lombok.Builder.Default
   private List<Subtask> subtasks = new ArrayList<>();
 
   public static class Builder {

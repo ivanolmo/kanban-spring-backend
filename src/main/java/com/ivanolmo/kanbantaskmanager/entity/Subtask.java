@@ -27,6 +27,7 @@ public class Subtask {
   private String title;
 
   @jakarta.persistence.Column(name = "completed", nullable = false)
+  @lombok.Builder.Default
   private Boolean completed = false;
 
   @CreatedDate
