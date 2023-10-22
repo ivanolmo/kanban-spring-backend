@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,11 +38,13 @@ public class AuthenticationService {
 
     userRepository.save(user);
 
+    UserDetails userDetails = new UserDetailsImpl(user);
+
     return AuthenticationResponseDTO
         .builder()
         .userId(user.getId())
         .email(user.getEmail())
-        .accessToken(jwtService.generateToken(user))
+        .accessToken(jwtService.generateToken(userDetails))
         .build();
   }
 
@@ -60,11 +63,13 @@ public class AuthenticationService {
     User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
         new AuthenticationException("User not found", HttpStatus.NOT_FOUND));
 
+    UserDetails userDetails = new UserDetailsImpl(user);
+
     return AuthenticationResponseDTO
         .builder()
         .userId(user.getId())
         .email(user.getEmail())
-        .accessToken(jwtService.generateToken(user))
+        .accessToken(jwtService.generateToken(userDetails))
         .build();
   }
 }
