@@ -4,9 +4,12 @@ import com.ivanolmo.kanbantaskmanager.config.JwtService;
 import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationResponseDTO;
 import com.ivanolmo.kanbantaskmanager.entity.User;
+import com.ivanolmo.kanbantaskmanager.exception.AuthenticationException;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,12 @@ public class AuthenticationService {
   private final JwtService jwtService;
 
   public AuthenticationResponseDTO register(AuthenticationRequestDTO request) {
+    // if user email is already in use, throw error
+    userRepository.findByEmail(request.getEmail().toLowerCase())
+        .ifPresent(user -> {
+          throw new AuthenticationException("Email is already in use", HttpStatus.BAD_REQUEST);
+        });
+
     User user = User
         .builder()
         .email(request.getEmail())
@@ -37,13 +46,19 @@ public class AuthenticationService {
   }
 
   public AuthenticationResponseDTO login(AuthenticationRequestDTO request) {
-    authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-            request.getEmail(),
-            request.getPassword()
-        )
-    );
-    User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+    try {
+      authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(
+              request.getEmail(),
+              request.getPassword()
+          )
+      );
+    } catch (BadCredentialsException e) {
+      throw new AuthenticationException("Invalid email or password", e, HttpStatus.UNAUTHORIZED);
+    }
+
+    User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
+        new AuthenticationException("User not found", HttpStatus.NOT_FOUND));
 
     return AuthenticationResponseDTO
         .builder()

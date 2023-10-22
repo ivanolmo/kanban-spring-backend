@@ -38,6 +38,14 @@ public class GlobalExceptionHandler {
     return createResponseEntity(e, errorMessage, HttpStatus.BAD_REQUEST, request, errors);
   }
 
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiResponse<Object>> handleAuthenticationException(AuthenticationException e,
+                                                                           HttpServletRequest request) {
+    log.error("Authentication errors occurred: {}", e.getMessage(), e);
+
+    return createResponseEntity(e, e.getHttpStatus(), request);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Object>> handleAllExceptions(Exception e,
                                                                  HttpServletRequest request) {
