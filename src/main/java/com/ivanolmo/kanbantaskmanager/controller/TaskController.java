@@ -20,27 +20,29 @@ public class TaskController {
   }
 
   @PostMapping
-  public ResponseEntity<TaskDTO> addTaskToColumn(@Valid @RequestBody TaskCreationRequestDTO request) {
+  public ResponseEntity<ApiResponse<TaskDTO>> addTaskToColumn(@Valid @RequestBody TaskCreationRequestDTO request) {
     TaskDTO newTaskDTO = taskService.addTaskToColumn(request.getColumnId(), request.getTask());
 
     log.info("Successfully added a new task to column with id: {}", request.getColumnId());
-    return new ResponseEntity<>(newTaskDTO, HttpStatus.CREATED);
+    return ApiResponseUtil.buildSuccessResponse(
+        newTaskDTO, "Successfully created the task", HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<TaskDTO> updateTask(@Valid @RequestBody TaskDTO taskDTO,
+  public ResponseEntity<ApiResponse<TaskDTO>> updateTask(@Valid @RequestBody TaskDTO taskDTO,
                                             @PathVariable String id) {
     TaskDTO updatedTaskDTO = taskService.updateTask(id, taskDTO);
 
     log.info("Successfully updated the task with id: {}", id);
-    return new ResponseEntity<>(updatedTaskDTO, HttpStatus.OK);
+    return ApiResponseUtil.buildSuccessResponse(
+        updatedTaskDTO, "Successfully updated the task", HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteTask(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable String id) {
     taskService.deleteTask(id);
 
     log.info("Successfully deleted the task with id: {}", id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return ApiResponseUtil.buildSuccessResponse(null, null, HttpStatus.NO_CONTENT);
   }
 }
