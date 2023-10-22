@@ -20,19 +20,21 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticationResponseDTO> register(
+  public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> register(
       @RequestBody AuthenticationRequestDTO request
   ) {
     AuthenticationResponseDTO response = authenticationService.register(request);
 
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
+    return ApiResponseUtil.buildSuccessResponse(
+        response, "Successful user creation", HttpStatus.CREATED);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponseDTO> login(
+  public ResponseEntity<ApiResponse<AuthenticationResponseDTO>> login(
       @RequestBody AuthenticationRequestDTO request
   ) {
     AuthenticationResponseDTO response = authenticationService.login(request);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    return ApiResponseUtil.buildSuccessResponse(
+        response, "Successful user login", HttpStatus.OK);
   }
 }

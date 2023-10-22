@@ -20,27 +20,29 @@ public class ColumnController {
   }
 
   @PostMapping
-  public ResponseEntity<ColumnDTO> addColumnToBoard(@Valid @RequestBody ColumnCreationRequestDTO request) {
+  public ResponseEntity<ApiResponse<ColumnDTO>> addColumnToBoard(@Valid @RequestBody ColumnCreationRequestDTO request) {
     ColumnDTO newColumnDTO = columnService.addColumnToBoard(request.getBoardId(), request.getColumn());
 
     log.info("Successfully added a new column to board with id: {}", request.getBoardId());
-    return new ResponseEntity<>(newColumnDTO, HttpStatus.CREATED);
+    return ApiResponseUtil.buildSuccessResponse(
+        newColumnDTO, "Successfully created the column", HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ColumnDTO> updateColumnName(@Valid @RequestBody ColumnDTO columnDTO,
+  public ResponseEntity<ApiResponse<ColumnDTO>> updateColumnName(@Valid @RequestBody ColumnDTO columnDTO,
                                                     @PathVariable String id) {
     ColumnDTO updatedColumnDTO = columnService.updateColumnName(id, columnDTO);
 
     log.info("Successfully updated the column with id: {}", id);
-    return new ResponseEntity<>(updatedColumnDTO, HttpStatus.OK);
+    return ApiResponseUtil.buildSuccessResponse(
+        updatedColumnDTO, "Successfully updated the column", HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteColumn(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<Void>> deleteColumn(@PathVariable String id) {
     columnService.deleteColumn(id);
 
     log.info("Successfully deleted the column with id: {}", id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return ApiResponseUtil.buildSuccessResponse(null, null, HttpStatus.NO_CONTENT);
   }
 }

@@ -20,28 +20,30 @@ public class SubtaskController {
   }
 
   @PostMapping
-  public ResponseEntity<SubtaskDTO> addSubtaskToTask(@Valid @RequestBody SubtaskCreationRequestDTO request) {
+  public ResponseEntity<ApiResponse<SubtaskDTO>> addSubtaskToTask(@Valid @RequestBody SubtaskCreationRequestDTO request) {
     SubtaskDTO newSubtaskDTO = subtaskService.addSubtaskToTask(request.getTaskId(),
         request.getSubtask());
 
     log.info("Successfully added a new subtask to task with id: {}", request.getTaskId());
-    return new ResponseEntity<>(newSubtaskDTO, HttpStatus.CREATED);
+    return ApiResponseUtil.buildSuccessResponse(
+        newSubtaskDTO, "Successfully created the subtask", HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<SubtaskDTO> updateSubtask(@Valid @RequestBody SubtaskDTO subtaskDTO,
+  public ResponseEntity<ApiResponse<SubtaskDTO>> updateSubtask(@Valid @RequestBody SubtaskDTO subtaskDTO,
                                                   @PathVariable String id) {
     SubtaskDTO updatedSubtaskDTO = subtaskService.updateSubtask(id, subtaskDTO);
 
     log.info("Successfully updated the subtask with id: {}", id);
-    return new ResponseEntity<>(updatedSubtaskDTO, HttpStatus.OK);
+    return ApiResponseUtil.buildSuccessResponse(
+        updatedSubtaskDTO, "Successfully updated the subtask", HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteSubtask(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<Void>> deleteSubtask(@PathVariable String id) {
     subtaskService.deleteSubtask(id);
 
     log.info("Successfully deleted the subtask with id: {}", id);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return ApiResponseUtil.buildSuccessResponse(null, null, HttpStatus.NO_CONTENT);
   }
 }
