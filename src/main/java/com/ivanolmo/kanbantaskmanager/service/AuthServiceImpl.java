@@ -1,10 +1,10 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.config.JwtService;
-import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationResponseDTO;
+import com.ivanolmo.kanbantaskmanager.dto.auth.AuthRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.auth.AuthResponseDTO;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.exception.AuthenticationException;
+import com.ivanolmo.kanbantaskmanager.exception.AuthException;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,17 +17,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthServiceImpl implements AuthService {
   private final AuthenticationManager authenticationManager;
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final JwtService jwtService;
 
-  public AuthenticationResponseDTO register(AuthenticationRequestDTO request) {
+  public AuthResponseDTO register(AuthRequestDTO request) {
     // if user email is already in use, throw error
     userRepository.findByEmail(request.getEmail().toLowerCase())
         .ifPresent(user -> {
-          throw new AuthenticationException("Email is already in use", HttpStatus.BAD_REQUEST);
+          throw new AuthException("Email is already in use", HttpStatus.BAD_REQUEST);
         });
 
     User user = User
@@ -40,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     UserDetails userDetails = new UserDetailsImpl(user);
 
-    return AuthenticationResponseDTO
+    return AuthResponseDTO
         .builder()
         .userId(user.getId())
         .email(user.getEmail())
@@ -48,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .build();
   }
 
-  public AuthenticationResponseDTO login(AuthenticationRequestDTO request) {
+  public AuthResponseDTO login(AuthRequestDTO request) {
     try {
       authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
@@ -57,15 +57,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
           )
       );
     } catch (BadCredentialsException e) {
-      throw new AuthenticationException("Invalid email or password", e, HttpStatus.UNAUTHORIZED);
+      throw new AuthException("Invalid email or password", e, HttpStatus.UNAUTHORIZED);
     }
 
     User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
-        new AuthenticationException("User not found", HttpStatus.NOT_FOUND));
+        new AuthException("User not found", HttpStatus.NOT_FOUND));
 
     UserDetails userDetails = new UserDetailsImpl(user);
 
-    return AuthenticationResponseDTO
+    return AuthResponseDTO
         .builder()
         .userId(user.getId())
         .email(user.getEmail())

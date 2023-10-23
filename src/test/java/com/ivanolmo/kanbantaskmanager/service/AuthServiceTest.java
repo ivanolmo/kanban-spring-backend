@@ -1,10 +1,10 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.config.JwtService;
-import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationRequestDTO;
-import com.ivanolmo.kanbantaskmanager.dto.auth.AuthenticationResponseDTO;
+import com.ivanolmo.kanbantaskmanager.dto.auth.AuthRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.auth.AuthResponseDTO;
 import com.ivanolmo.kanbantaskmanager.entity.User;
-import com.ivanolmo.kanbantaskmanager.exception.AuthenticationException;
+import com.ivanolmo.kanbantaskmanager.exception.AuthException;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-public class AuthenticationServiceTest {
+public class AuthServiceTest {
   @MockBean
   private AuthenticationManager authenticationManager;
   @MockBean
@@ -46,10 +46,10 @@ public class AuthenticationServiceTest {
   @MockBean
   private JwtService jwtService;
   @Autowired
-  private AuthenticationService authenticationService;
+  private AuthService authService;
   @Captor
   private ArgumentCaptor<UserDetailsImpl> userDetailsCaptor;
-  AuthenticationRequestDTO request;
+  AuthRequestDTO request;
   User user;
   String email;
   String password;
@@ -59,7 +59,7 @@ public class AuthenticationServiceTest {
     email = "test@example.com";
     password = "password";
 
-    request = new AuthenticationRequestDTO();
+    request = new AuthRequestDTO();
     request.setEmail(email);
     request.setPassword(password);
 
@@ -76,7 +76,7 @@ public class AuthenticationServiceTest {
     when(jwtService.generateToken(userDetailsCaptor.capture())).thenReturn("token");
 
     // then
-    AuthenticationResponseDTO response = authenticationService.register(request);
+    AuthResponseDTO response = authService.register(request);
     UserDetailsImpl capturedUserDetails = userDetailsCaptor.getValue();
 
     assertEquals(user.getId(), response.getUserId(), "User ID should match");
@@ -96,9 +96,9 @@ public class AuthenticationServiceTest {
     when(userRepository.findByEmail(request.getEmail().toLowerCase())).thenReturn(Optional.of(existingUser));
 
     // then
-    AuthenticationException thrown = assertThrows(AuthenticationException.class, () -> {
+    AuthException thrown = assertThrows(AuthException.class, () -> {
       // when
-      authenticationService.register(request);
+      authService.register(request);
     });
 
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getHttpStatus());
@@ -118,7 +118,7 @@ public class AuthenticationServiceTest {
     when(jwtService.generateToken(userDetailsCaptor.capture())).thenReturn("token");
 
     // then
-    AuthenticationResponseDTO response = authenticationService.login(request);
+    AuthResponseDTO response = authService.login(request);
     UserDetailsImpl capturedUserDetails = userDetailsCaptor.getValue();
 
     assertEquals(user.getId(), response.getUserId(), "User ID should match");
@@ -145,9 +145,9 @@ public class AuthenticationServiceTest {
         .thenThrow(new BadCredentialsException("Bad credentials"));
 
     // then
-    AuthenticationException thrown = assertThrows(
-        AuthenticationException.class,
-        () -> authenticationService.login(request),
+    AuthException thrown = assertThrows(
+        AuthException.class,
+        () -> authService.login(request),
         "Expected login to throw AuthenticationException for bad credentials"
     );
 

@@ -28,7 +28,7 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @RequiredArgsConstructor
 public class WebSecurityConfig {
   private final AuthenticationProvider authenticationProvider;
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final JwtAuthFilter jwtAuthenticationFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
