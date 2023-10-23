@@ -43,6 +43,7 @@ public class ColumnMapper {
     return new Column.Builder()
         .id(columnDTO.getId())
         .name(columnDTO.getName())
+        .tasks(columnDTO.getTasks())
         .build();
   }
 }

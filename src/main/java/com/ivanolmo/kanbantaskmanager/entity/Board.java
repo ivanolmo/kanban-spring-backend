@@ -70,13 +70,11 @@ public class Board {
       List<Column> columns = Optional.ofNullable(columnDTOs)
           .orElse(Collections.emptyList())
           .stream()
-          .map(columnDTO -> {
-            Column column = new Column();
-            column.setName(columnDTO.getName());
-            column.setBoard(board);
-            return column;
-          })
-          .toList();
+          .map(columnDTO -> Column
+              .builder()
+              .name(columnDTO.getName())
+              .board(board)
+              .build()).toList();
 
       board.setColumns(columns);
       return this;

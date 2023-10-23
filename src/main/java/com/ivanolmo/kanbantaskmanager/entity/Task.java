@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +12,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Builder
@@ -47,6 +50,12 @@ public class Task {
   @lombok.Builder.Default
   private List<Subtask> subtasks = new ArrayList<>();
 
+  @Override
+  public String toString() {
+    return "Task [id=" + id + ", title=" + title + "]";
+  }
+
+  // custom Builder class for dto -> entity conversion
   public static class Builder {
     private final Task task = new Task();
 
@@ -62,6 +71,21 @@ public class Task {
 
     public Builder description(String description) {
       task.setDescription(description);
+      return this;
+    }
+
+    public Builder subtasks(List<SubtaskDTO> subtaskDTOs) {
+      List<Subtask> subtasks = Optional.ofNullable(subtaskDTOs)
+          .orElse(Collections.emptyList())
+          .stream()
+          .map(subtaskDTO -> Subtask
+              .builder()
+              .title(subtaskDTO.getTitle())
+              .completed(subtaskDTO.getCompleted())
+              .task(task)
+              .build()).toList();
+
+      task.setSubtasks(subtasks);
       return this;
     }
 

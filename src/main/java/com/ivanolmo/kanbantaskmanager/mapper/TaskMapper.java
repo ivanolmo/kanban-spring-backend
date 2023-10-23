@@ -45,6 +45,7 @@ public class TaskMapper {
         .id(taskDTO.getId())
         .title(taskDTO.getTitle())
         .description(taskDTO.getDescription())
+        .subtasks(taskDTO.getSubtasks())
         .build();
   }
 }

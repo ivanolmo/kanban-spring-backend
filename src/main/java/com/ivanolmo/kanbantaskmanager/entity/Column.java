@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.entity;
 
+import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @Builder
@@ -57,6 +60,21 @@ public class Column {
 
     public Builder name(String name) {
       column.setName(name);
+      return this;
+    }
+
+    public Builder tasks(List<TaskDTO> taskDTOs) {
+      List<Task> tasks = Optional.ofNullable(taskDTOs)
+          .orElse(Collections.emptyList())
+          .stream()
+          .map(taskDTO -> Task
+              .builder()
+              .title(taskDTO.getTitle())
+              .description(taskDTO.getDescription())
+              .column(column)
+              .build()).toList();
+
+      column.setTasks(tasks);
       return this;
     }
 
