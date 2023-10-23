@@ -1,18 +1,15 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
-import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
-import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
-import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
+import com.ivanolmo.kanbantaskmanager.util.UserHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,36 +18,22 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class BoardServiceImpl implements BoardService {
   private final BoardRepository boardRepository;
-  private final ColumnRepository columnRepository;
-  private final UserRepository userRepository;
   private final BoardMapper boardMapper;
-  private final ColumnMapper columnMapper;
-
-  public BoardServiceImpl(BoardRepository boardRepository,
-                          ColumnRepository columnRepository,
-                          UserRepository userRepository,
-                          BoardMapper boardMapper,
-                          ColumnMapper columnMapper) {
-    this.boardRepository = boardRepository;
-    this.columnRepository = columnRepository;
-    this.userRepository = userRepository;
-    this.boardMapper = boardMapper;
-    this.columnMapper = columnMapper;
-  }
+  private final UserHelper userHelper;
 
   // get all boards for a user
   @Transactional(readOnly = true)
-  public List<BoardDTO> getAllUserBoards(String userId) {
-    // find user by id or else throw exception
-    if (!userRepository.existsById(userId)) {
-      throw new EntityOperationException("User", "read", HttpStatus.NOT_FOUND);
-    }
+  public List<BoardDTO> getAllUserBoards() {
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
 
     // get users boards
-    List<Board> boards = boardRepository.findByUserId(userId).orElse(Collections.emptyList());
+    List<Board> boards =
+        boardRepository.findAllByUserId(user.getId()).orElse(Collections.emptyList());
 
     // map boards to DTOs and return as list
     return boards.stream()
@@ -58,92 +41,71 @@ public class BoardServiceImpl implements BoardService {
         .toList();
   }
 
-  // get board by id
   @Transactional(readOnly = true)
-  public BoardDTO getBoardById(String id) {
-    // get board by id or else throw exception
-    Board board = boardRepository.findById(id)
+  public BoardDTO getBoardById(String boardId) {
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get user board
+    Board board = boardRepository.findByIdAndUserId(boardId, user.getId())
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
     // map board to DTO and return
     return boardMapper.toDTO(board);
   }
 
-  @Transactional(readOnly = true)
-  public List<ColumnDTO> getAllColumnsForBoard(String boardId) {
-    // find board by id or else throw exception
-    if (!boardRepository.existsById(boardId)) {
-      throw new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND);
-    }
-
-    // get board columns
-    List<Column> columns = columnRepository.findAllByBoardId(boardId).orElse(Collections.emptyList());
-
-    // map columns to DTOs and return as list
-    return columns.stream()
-        .map(columnMapper::toDTO)
-        .toList();
-  }
-
   @Transactional
-  public BoardDTO addBoardToUser(String userId, BoardDTO boardDTO) {
-    // get user, throw error if not found
-    User user =
-        userRepository.findById(userId)
-            .orElseThrow(() -> new EntityOperationException("User", "read", HttpStatus.NOT_FOUND));
+  public BoardDTO addBoardToUser(BoardDTO boardDTO) {
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
 
-    // if new board name already exists for this user, throw error
-    boardRepository.findByNameAndUserId(boardDTO.getName(), userId)
+    // check if new board name already exists for this user
+    boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())
         .ifPresent(board -> {
-          throw new EntityOperationException("A board with that name already exists",
-              HttpStatus.CONFLICT);
+          throw new EntityOperationException(
+              "A board with that name already exists", HttpStatus.CONFLICT);
         });
 
     // convert the BoardDTO to a Board entity and set user
     Board board = boardMapper.toEntity(boardDTO);
     board.setUser(user);
 
-    // save and return dto, throw error if exception
+    // save and return dto
     try {
       board = boardRepository.save(board);
       return boardMapper.toDTO(board);
     } catch (Exception e) {
       log.error("An error occurred while adding board '{}' to user '{}': {}",
-          boardDTO.getName(), userId, e.getMessage());
+          board.getName(), user.getId(), e.getMessage());
       throw new EntityOperationException("Board", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   // update board
   @Transactional
-  public BoardDTO updateBoardName(String id, BoardDTO boardDTO) {
-    // get board by id or else throw exception
-    Board board = boardRepository.findById(id)
+  public BoardDTO updateBoardName(String id, String newName) {
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get board by id
+    Board board = boardRepository.findByIdAndUserId(id, user.getId())
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
-    // get user that this board belongs to or else throw exception
-    // an error being thrown here would signify a data integrity issue
-    User user = board.getUser();
-
-    if (user == null) {
-      throw new EntityOperationException("User", "read", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    // if board name already exists for this user, throw error
-    boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())
+    // check if board name already exists for this user
+    boardRepository.findByNameAndUserId(newName, user.getId())
         .ifPresent(existingBoard -> {
           throw new EntityOperationException("A board with that name already exists",
               HttpStatus.CONFLICT);
         });
 
-    // perform update and return dto
+    // update board and return dto
     try {
-      board.setName(boardDTO.getName());
+      board.setName(newName);
       Board updatedBoard = boardRepository.save(board);
       return boardMapper.toDTO(updatedBoard);
     } catch (Exception e) {
-      log.error("An error occurred while updating board '{}': {}",
-          boardDTO.getName(), e.getMessage());
+      log.error("An error occurred while updating board '{}' with new name '{}': {}",
+          board.getName(), newName, e.getMessage());
       throw new EntityOperationException("Board", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -151,16 +113,22 @@ public class BoardServiceImpl implements BoardService {
   // delete board
   @Transactional
   public void deleteBoard(String id) {
-    // delete board or throw error if board not found
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // check if board exists
+    if (!boardRepository.existsByIdAndUserId(id, user.getId())) {
+      throw new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND);
+    }
+
+    // delete board
     try {
-      boardRepository.deleteById(id);
-    } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred while deleting board id {}: {}",
-          id, e.getMessage());
+      boardRepository.deleteByIdAndUserId(id, user.getId());
+    } catch (DataIntegrityViolationException e) {
+      log.error("An error occurred while deleting board id {}: {}", id, e.getMessage());
       throw new EntityOperationException("Board", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
-      log.error("An error occurred while deleting board id {}: {}",
-          id, e.getMessage());
+      log.error("An error occurred while deleting board id {}: {}", id, e.getMessage());
       throw new EntityOperationException("Board", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
