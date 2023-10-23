@@ -1,8 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.dto.BoardCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +21,10 @@ public class BoardController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<List<BoardDTO>>> getAllUserBoards(@RequestParam String userId) {
-    List<BoardDTO> boards = boardService.getAllUserBoards(userId);
+  public ResponseEntity<ApiResponse<List<BoardDTO>>> getAllUserBoards() {
+    List<BoardDTO> boards = boardService.getAllUserBoards();
 
-    log.info("Successfully retrieved all boards for user with id: {}", userId);
+    log.info("Successfully retrieved all boards for the user");
     return ApiResponseUtil.buildSuccessResponse(
         boards, "Successfully retrieved all boards for the user", HttpStatus.OK);
   }
@@ -40,18 +38,9 @@ public class BoardController {
         board, "Successfully retrieved the board by id", HttpStatus.OK);
   }
 
-  @GetMapping("/{id}/columns")
-  public ResponseEntity<ApiResponse<List<ColumnDTO>>> getAllColumnsForBoard(@PathVariable String id) {
-    List<ColumnDTO> columns = boardService.getAllColumnsForBoard(id);
-
-    log.info("Successfully retrieved all columns for board with id: {}", id);
-    return ApiResponseUtil.buildSuccessResponse(
-        columns, "Successfully retrieved all columns for the board", HttpStatus.OK);
-  }
-
   @PostMapping
-  public ResponseEntity<ApiResponse<BoardDTO>> addBoardToUser(@Valid @RequestBody BoardCreationRequestDTO request) {
-    BoardDTO newBoardDTO = boardService.addBoardToUser(request.getUserId(), request.getBoard());
+  public ResponseEntity<ApiResponse<BoardDTO>> addBoardToUser(@Valid @RequestBody BoardDTO boardDTO) {
+    BoardDTO newBoardDTO = boardService.addBoardToUser(boardDTO);
 
     log.info("Successfully created a new board with id: {}", newBoardDTO.getId());
     return ApiResponseUtil.buildSuccessResponse(
@@ -59,9 +48,9 @@ public class BoardController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<BoardDTO>> updateBoardName(@Valid @RequestBody BoardDTO boardDTO,
+  public ResponseEntity<ApiResponse<BoardDTO>> updateBoardName(@Valid @RequestBody String newName,
                                                                @PathVariable String id) {
-    BoardDTO updatedBoardDTO = boardService.updateBoardName(id, boardDTO);
+    BoardDTO updatedBoardDTO = boardService.updateBoardName(id, newName);
 
     log.info("Successfully updated the board with id: {}", id);
     return ApiResponseUtil.buildSuccessResponse(
