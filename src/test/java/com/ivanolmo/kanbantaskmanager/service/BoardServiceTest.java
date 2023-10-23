@@ -1,23 +1,24 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
-import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.BoardMapper;
-import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
-import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -38,18 +39,28 @@ public class BoardServiceTest {
   @MockBean
   private UserRepository userRepository;
   @MockBean
-  private ColumnRepository columnRepository;
-  @MockBean
   private BoardMapper boardMapper;
-  @MockBean
-  private ColumnMapper columnMapper;
   @Autowired
   private BoardService boardService;
+  private String username;
+  private User user;
+
+  @BeforeEach
+  public void setUp() {
+    username = "user@example.com";
+    user = User.builder().id("user").email(username).build();
+
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContextHolder.setContext(securityContext);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn(username);
+  }
 
   @Test
   public void testGetAllUserBoards() {
     // given
-    String userId = "user";
     Board board1 = new Board();
     Board board2 = new Board();
     Board board3 = new Board();
@@ -61,14 +72,14 @@ public class BoardServiceTest {
     List<BoardDTO> returnedBoardDTOs = Arrays.asList(boardDTO1, boardDTO2, boardDTO3);
 
     // when
-    when(userRepository.existsById(userId)).thenReturn(true);
-    when(boardRepository.findByUserId(userId)).thenReturn(Optional.of(userBoards));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findAllByUserId(user.getId())).thenReturn(Optional.of(userBoards));
     when(boardMapper.toDTO(board1)).thenReturn(boardDTO1);
     when(boardMapper.toDTO(board2)).thenReturn(boardDTO2);
     when(boardMapper.toDTO(board3)).thenReturn(boardDTO3);
 
     // then
-    List<BoardDTO> result = boardService.getAllUserBoards(userId);
+    List<BoardDTO> result = boardService.getAllUserBoards();
     assertNotNull(result, "Result should not be null");
     assertEquals(returnedBoardDTOs.size(), result.size(), "The number of boards should match");
     assertEquals(boardDTO1, result.get(0), "The BoardDTO instances should match");
@@ -79,28 +90,26 @@ public class BoardServiceTest {
   @Test
   public void testGetAllUserBoards_userNotFoundException() {
     // given
-    String userId = "user";
+    // N/A for this test
 
     // when
-    when(userRepository.existsById(userId)).thenReturn(false);
+    when(userRepository.findByEmail(username)).thenReturn(Optional.empty());
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.getAllUserBoards(userId));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.getAllUserBoards());
     assertEquals("User read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testGetBoardById() {
     // given
-    Board board = new Board();
-    board.setId("board");
-
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setId(board.getId());
+    User user = User.builder().id("user").email(username).build();
+    Board board = Board.builder().id("board").user(user).build();
+    BoardDTO boardDTO = BoardDTO.builder().id(board.getId()).build();
 
     // when
-    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
+    when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(board.getId(), user.getId())).thenReturn(Optional.of(board));
     when(boardMapper.toDTO(any(Board.class))).thenReturn(boardDTO);
 
     // then
@@ -115,309 +124,227 @@ public class BoardServiceTest {
     String boardId = "board";
 
     // when
-    when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(boardId, user.getId())).thenReturn(Optional.empty());
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.getBoardById(boardId));
-    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
-  }
-
-  @Test
-  public void testGetAllColumnsForBoard() {
-    // given
-    String boardId = "board";
-    Column column1 = new Column();
-    Column column2 = new Column();
-    Column column3 = new Column();
-    List<Column> boardColumns = Arrays.asList(column1, column2, column3);
-
-    ColumnDTO columnDTO1 = new ColumnDTO();
-    ColumnDTO columnDTO2 = new ColumnDTO();
-    ColumnDTO columnDTO3 = new ColumnDTO();
-
-    // when
-    when(boardRepository.existsById(boardId)).thenReturn(true);
-    when(columnRepository.findAllByBoardId(boardId)).thenReturn(Optional.of(boardColumns));
-    when(columnMapper.toDTO(column1)).thenReturn(columnDTO1);
-    when(columnMapper.toDTO(column2)).thenReturn(columnDTO2);
-    when(columnMapper.toDTO(column3)).thenReturn(columnDTO3);
-
-    // then
-    List<ColumnDTO> result = boardService.getAllColumnsForBoard(boardId);
-    assertNotNull(result, "Result should not null");
-    assertEquals(boardColumns.size(), result.size(), "The number of columns should match");
-
-    // Compare values instead of instances
-    assertEquals(columnDTO1, result.get(0), "The ColumnDTO instances should match");
-    assertEquals(columnDTO2, result.get(1), "The ColumnDTO instances should match");
-    assertEquals(columnDTO3, result.get(2), "The ColumnDTO instances should match");
-  }
-
-  @Test
-  public void testGetAllColumnsForBoard_boardNotFoundException() {
-    // given
-    String boardId = "board";
-
-    // when
-    when(boardRepository.existsById(boardId)).thenReturn(false);
-
-    // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.getBoardById(boardId));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.getBoardById(boardId));
     assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testAddBoardToUser() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("New Board");
-
-    User user = new User();
-    user.setId("user");
-
-    Board board = new Board();
-    board.setName(boardDTO.getName());
-    board.setUser(user);
-
-    BoardDTO returnedBoardDTO = new BoardDTO();
-    returnedBoardDTO.setName("New Board");
+    BoardDTO boardDTO = BoardDTO.builder().name("New Board").build();
+    Board board = Board.builder().name(boardDTO.getName()).user(user).build();
+    BoardDTO returnedBoardDTO = BoardDTO.builder().name("New Board").build();
 
     // when
-    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
     when(boardMapper.toEntity(boardDTO)).thenReturn(board);
     when(boardRepository.save(any(Board.class))).thenReturn(board);
     when(boardMapper.toDTO(board)).thenReturn(returnedBoardDTO);
 
     // then
-    BoardDTO result = boardService.addBoardToUser(user.getId(), boardDTO);
+    BoardDTO result = boardService.addBoardToUser(boardDTO);
     assertNotNull(result, "Board DTO should not be null");
     assertEquals("New Board", result.getName(), "Board name should match");
 
     // verify interactions
-    verify(userRepository).findById(user.getId());
+    verify(userRepository).findByEmail(username);
     verify(boardRepository).save(any(Board.class));
   }
 
   @Test
   public void testAddBoardToUser_userNotFoundException() {
     // given
-    String userId = "user";
     BoardDTO boardDTO = new BoardDTO();
 
     // when
-    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    when(userRepository.findByEmail(username)).thenReturn(Optional.empty());
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.addBoardToUser(userId, boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.addBoardToUser(boardDTO));
     assertEquals("User read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testAddBoardToUser_boardCreationException() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("New Board");
-
-    User user = new User();
-    user.setId("user");
-
-    Board board = new Board();
-    board.setName(boardDTO.getName());
-    board.setUser(user);
+    BoardDTO boardDTO = BoardDTO.builder().name("New Board").build();
+    Board board = Board.builder().name(boardDTO.getName()).user(user).build();
 
     // when
-    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
     when(boardMapper.toEntity(boardDTO)).thenReturn(board);
     doThrow(new RuntimeException("Error")).when(boardRepository).save(any(Board.class));
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.addBoardToUser(user.getId(), boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.addBoardToUser(boardDTO));
     assertEquals("Board create operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testAddBoardToUser_boardAlreadyExistsException() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("Existing Board");
-
-    User user = new User();
-    user.setId("user");
-
-    Board board = new Board();
-    board.setName(boardDTO.getName());
-    board.setUser(user);
+    BoardDTO boardDTO = BoardDTO.builder().name("Existing Board").build();
+    Board board = Board.builder().name(boardDTO.getName()).user(user).build();
 
     // when
-    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
     when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.of(board));
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.addBoardToUser(user.getId(), boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.addBoardToUser(boardDTO));
     assertEquals("A board with that name already exists", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateBoardName() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("Updated Board Name");
-
-    Board existingBoard = new Board();
-    existingBoard.setId("board");
-    existingBoard.setName("Existing Board Name");
-
-    User user = new User();
-    user.setId("user");
-    existingBoard.setUser(user);
-
-    Board updatedBoard = new Board();
-    updatedBoard.setId(existingBoard.getId());
-    updatedBoard.setName(boardDTO.getName());
-    updatedBoard.setUser(user);
+    String updatedName = "Updated Board Name";
+    BoardDTO boardDTO = BoardDTO.builder().name(updatedName).build();
+    Board existingBoard = Board.builder().id("board").name("Existing Board Name").user(user).build();
+    Board updatedBoard = Board.builder().id(existingBoard.getId()).name(updatedName).user(user).build();
 
     // when
-    when(boardRepository.findById(existingBoard.getId())).thenReturn(Optional.of(existingBoard));
-    when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.empty());
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(existingBoard.getId(), user.getId())).thenReturn(Optional.of(existingBoard));
+    when(boardRepository.findByNameAndUserId(updatedName, user.getId())).thenReturn(Optional.empty());
     when(boardRepository.save(any(Board.class))).thenReturn(updatedBoard);
     when(boardMapper.toDTO(updatedBoard)).thenReturn(boardDTO);
 
     // then
-    BoardDTO result = boardService.updateBoardName(existingBoard.getId(), boardDTO);
+    BoardDTO result = boardService.updateBoardName(existingBoard.getId(), updatedName);
     assertNotNull(result, "Board DTO should not be null");
-    assertEquals(boardDTO.getName(), result.getName(), "Board name should match");
+    assertEquals(updatedName, result.getName(), "Board name should match");
 
     // verify interactions
-    verify(boardRepository).findById(existingBoard.getId());
-    verify(boardRepository).findByNameAndUserId(boardDTO.getName(), user.getId());
+    verify(userRepository).findByEmail(username);
+    verify(boardRepository).findByIdAndUserId(existingBoard.getId(), user.getId());
+    verify(boardRepository).findByNameAndUserId(updatedName, user.getId());
     verify(boardRepository).save(any(Board.class));
   }
 
   @Test
   public void testUpdateBoardName_boardNotFoundException() {
     // given
-    String boardId = "board";
-    BoardDTO boardDTO = new BoardDTO();
+    String updatedName = "Updated Board Name";
+    BoardDTO boardDTO = BoardDTO.builder().id("board").build();
 
     // when
-    when(boardRepository.findById(boardId)).thenReturn(Optional.empty());
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(boardDTO.getId(), user.getId())).thenReturn(Optional.empty());
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.updateBoardName(boardId, boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.updateBoardName(boardDTO.getId(), updatedName));
     assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateBoardName_userNotFoundException() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    Board board = new Board();
-    board.setId("board");
+    String updatedName = "Updated Board Name";
+    Board board = Board.builder().id("board").build();
 
     // when
-    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.empty());
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.updateBoardName(board.getId(), boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.updateBoardName(board.getId(), updatedName));
     assertEquals("User read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateBoardName_boardAlreadyExistsException() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("Duplicate Board Name");
-
-    User user = new User();
-    user.setId("user");
-
-    Board existingBoard = new Board();
-    existingBoard.setId("board");
-    existingBoard.setUser(user);
+    String duplicateName = "Duplicate Board Name";
+    Board existingBoard = Board.builder().id("board").user(user).build();
 
     // when
-    when(boardRepository.findById(existingBoard.getId())).thenReturn(Optional.of(existingBoard));
-    when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.of(existingBoard));
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(existingBoard.getId(), user.getId())).thenReturn(Optional.of(existingBoard));
+    when(boardRepository.findByNameAndUserId(duplicateName, user.getId())).thenReturn(Optional.of(existingBoard));
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.updateBoardName(existingBoard.getId(), boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.updateBoardName(existingBoard.getId(), duplicateName));
     assertEquals("A board with that name already exists", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testUpdateBoardName_boardUpdateException() {
     // given
-    BoardDTO boardDTO = new BoardDTO();
-    boardDTO.setName("Updated Board Name");
-
-    Board board = new Board();
-    board.setId("board");
-    board.setName("Existing Name");
-
-    User user = new User();
-    user.setId("user");
-    board.setUser(user);
+    String updatedName = "Updated Board Name";
+    Board board = Board.builder().id("board").name("Existing Name").user(user).build();
 
     // when
-    when(boardRepository.findById(board.getId())).thenReturn(Optional.of(board));
-    when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.empty());
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.findByIdAndUserId(board.getId(), user.getId())).thenReturn(Optional.of(board));
+    when(boardRepository.findByNameAndUserId(updatedName, user.getId())).thenReturn(Optional.empty());
     doThrow(new RuntimeException("Error")).when(boardRepository).save(any(Board.class));
 
     // then
-    EntityOperationException e = assertThrows(EntityOperationException.class,
-        () -> boardService.updateBoardName(board.getId(), boardDTO));
+    EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.updateBoardName(board.getId(), updatedName));
     assertEquals("Board update operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testDeleteBoard() {
     // given
-    String boardId = "board";
+    Board board = Board.builder().id("board").user(user).build();
 
     // when
-    doNothing().when(boardRepository).deleteById(boardId);
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.existsByIdAndUserId(board.getId(), user.getId())).thenReturn(true);
+    doNothing().when(boardRepository).deleteById(board.getId());
 
     // then
-    boardService.deleteBoard(boardId);
+    boardService.deleteBoard(board.getId());
 
     // verify interactions
-    verify(boardRepository).deleteById(boardId);
+    verify(userRepository).findByEmail(username);
+    verify(boardRepository).existsByIdAndUserId(board.getId(), user.getId());
+  }
+
+  @Test
+  public void testDeleteBoard_userNotFound() {
+    // given
+    Board board = Board.builder().id("board").user(user).build();
+
+    // when
+    when(userRepository.findByEmail(username)).thenReturn(Optional.empty());
+
+    // then
+    Exception e = assertThrows(EntityOperationException.class, () -> boardService.deleteBoard(board.getId()));
+    assertEquals("User read operation failed", e.getMessage(), "The exception message should " + "match");
   }
 
   @Test
   public void testDeleteBoard_boardNotFound() {
     // given
-    String boardId = "board";
+    Board board = Board.builder().id("board").user(user).build();
 
     // when
-    doThrow(EmptyResultDataAccessException.class).when(boardRepository).deleteById(boardId);
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.existsByIdAndUserId(board.getId(), user.getId())).thenReturn(false);
 
     // then
-    Exception e = assertThrows(EntityOperationException.class,
-        () -> boardService.deleteBoard(boardId));
-    assertEquals("Board delete operation failed", e.getMessage(), "The exception message should match");
+    Exception e = assertThrows(EntityOperationException.class, () -> boardService.deleteBoard(board.getId()));
+    assertEquals("Board read operation failed", e.getMessage(), "The exception message should match");
   }
 
   @Test
   public void testDeleteBoard_boardDeleteException() {
     // given
-    String boardId = "board";
+    Board board = Board.builder().id("board").user(user).build();
 
     // when
-    doThrow(RuntimeException.class).when(boardRepository).deleteById(boardId);
+    when(userRepository.findByEmail(username)).thenReturn(Optional.of(user));
+    when(boardRepository.existsByIdAndUserId(board.getId(), user.getId())).thenReturn(true);
+    doThrow(new EntityOperationException("Board", "delete", HttpStatus.INTERNAL_SERVER_ERROR)).when(boardRepository).deleteByIdAndUserId(board.getId(), user.getId());
 
     // then
-    Exception e = assertThrows(EntityOperationException.class,
-        () -> boardService.deleteBoard(boardId));
-    assertEquals("Board delete operation failed", e.getMessage(), "The exception message should " +
-        "match");
+    Exception e = assertThrows(EntityOperationException.class, () -> boardService.deleteBoard(board.getId()));
+    assertEquals("Board delete operation failed", e.getMessage(), "The exception message should " + "match");
   }
 }
