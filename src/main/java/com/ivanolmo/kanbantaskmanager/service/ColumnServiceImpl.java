@@ -79,7 +79,7 @@ public class ColumnServiceImpl implements ColumnService {
     // check if column info and user id matches
     if (!columnInfo.getUserId().equals(user.getId())) {
       throw new EntityOperationException(
-          "You do not have permission to add a column to this board", HttpStatus.FORBIDDEN);
+          "You do not have permission to update a column in this board", HttpStatus.FORBIDDEN);
     }
 
     Column column = columnInfo.getColumn();
