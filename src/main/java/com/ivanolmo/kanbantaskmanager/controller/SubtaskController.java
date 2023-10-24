@@ -4,6 +4,7 @@ import com.ivanolmo.kanbantaskmanager.dto.SubtaskCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.SubtaskService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/subtasks")
+@RequiredArgsConstructor
 @Slf4j
 public class SubtaskController {
   private final SubtaskService subtaskService;
-
-  public SubtaskController(SubtaskService subtaskService) {
-    this.subtaskService = subtaskService;
-  }
 
   @PostMapping
   public ResponseEntity<ApiResponse<SubtaskDTO>> addSubtaskToTask(@Valid @RequestBody SubtaskCreationRequestDTO request) {
