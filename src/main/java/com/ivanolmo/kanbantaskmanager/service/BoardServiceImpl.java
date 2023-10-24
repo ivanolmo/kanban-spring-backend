@@ -1,6 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
+import com.ivanolmo.kanbantaskmanager.dto.BoardInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
@@ -9,7 +10,6 @@ import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.util.UserHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +91,12 @@ public class BoardServiceImpl implements BoardService {
     Board board = boardRepository.findByIdAndUserId(id, user.getId())
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
+    // check that the board -> user relation matches
+    if (!board.getUser().getId().equals(user.getId())) {
+      throw new EntityOperationException("You do not have permission to update this board",
+          HttpStatus.FORBIDDEN);
+    }
+
     // check if board name already exists for this user
     boardRepository.findByNameAndUserId(newName, user.getId())
         .ifPresent(existingBoard -> {
@@ -116,17 +122,19 @@ public class BoardServiceImpl implements BoardService {
     // get user from security context via helper method
     User user = userHelper.getCurrentUser();
 
-    // check if board exists
-    if (!boardRepository.existsByIdAndUserId(id, user.getId())) {
-      throw new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND);
+    // get board and user info
+    BoardInfo boardInfo = boardRepository.findBoardInfoById(id)
+        .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
+
+    // check if board exists and belongs to the current user
+    if (!boardInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to delete this board", HttpStatus.FORBIDDEN);
     }
 
     // delete board
     try {
-      boardRepository.deleteByIdAndUserId(id, user.getId());
-    } catch (DataIntegrityViolationException e) {
-      log.error("An error occurred while deleting board id {}: {}", id, e.getMessage());
-      throw new EntityOperationException("Board", "delete", HttpStatus.NOT_FOUND);
+      boardRepository.deleteById(id);
     } catch (Exception e) {
       log.error("An error occurred while deleting board id {}: {}", id, e.getMessage());
       throw new EntityOperationException("Board", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
