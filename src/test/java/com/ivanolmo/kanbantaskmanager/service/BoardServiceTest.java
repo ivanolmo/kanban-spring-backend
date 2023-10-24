@@ -56,6 +56,8 @@ public class BoardServiceTest {
 
     lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
     lenient().when(authentication.getName()).thenReturn(username);
+
+    when(userHelper.getCurrentUser()).thenReturn(user);
   }
 
   @Test
@@ -72,7 +74,6 @@ public class BoardServiceTest {
     List<BoardDTO> returnedBoardDTOs = Arrays.asList(boardDTO1, boardDTO2, boardDTO3);
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findAllByUserId(user.getId())).thenReturn(Optional.of(userBoards));
     when(boardMapper.toDTO(board1)).thenReturn(boardDTO1);
     when(boardMapper.toDTO(board2)).thenReturn(boardDTO2);
@@ -113,7 +114,6 @@ public class BoardServiceTest {
     BoardDTO boardDTO = BoardDTO.builder().id(board.getId()).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(board.getId(), user.getId())).thenReturn(Optional.of(board));
     when(boardMapper.toDTO(any(Board.class))).thenReturn(boardDTO);
 
@@ -134,7 +134,6 @@ public class BoardServiceTest {
     String boardId = "board";
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(boardId, user.getId())).thenReturn(Optional.empty());
 
     // then
@@ -150,7 +149,6 @@ public class BoardServiceTest {
     BoardDTO returnedBoardDTO = BoardDTO.builder().name("New Board").build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.empty());
     when(boardMapper.toEntity(boardDTO)).thenReturn(board);
     when(boardRepository.save(any(Board.class))).thenReturn(board);
@@ -181,6 +179,10 @@ public class BoardServiceTest {
     // then
     EntityOperationException e = assertThrows(EntityOperationException.class, () -> boardService.addBoardToUser(boardDTO));
     assertEquals("User read operation failed", e.getMessage(), "The exception message should match");
+
+    // verify
+    verify(userHelper).getCurrentUser();
+    verify(boardRepository, never()).save(any(Board.class));
   }
 
   @Test
@@ -190,7 +192,6 @@ public class BoardServiceTest {
     Board board = Board.builder().id("board").name(boardDTO.getName()).user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.of(board));
 
     // then
@@ -210,7 +211,6 @@ public class BoardServiceTest {
     Board board = Board.builder().name(boardDTO.getName()).user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())).thenReturn(Optional.empty());
     when(boardMapper.toEntity(boardDTO)).thenReturn(board);
     doThrow(new RuntimeException("Error")).when(boardRepository).save(any(Board.class));
@@ -234,7 +234,6 @@ public class BoardServiceTest {
     Board updatedBoard = Board.builder().id(existingBoard.getId()).name(updatedName).user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(existingBoard.getId(), user.getId())).thenReturn(Optional.of(existingBoard));
     when(boardRepository.findByNameAndUserId(updatedName, user.getId())).thenReturn(Optional.empty());
     when(boardRepository.save(any(Board.class))).thenReturn(updatedBoard);
@@ -279,7 +278,6 @@ public class BoardServiceTest {
     Board otherBoard = Board.builder().id("board").user(otherUser).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(otherBoard.getId(), user.getId())).thenReturn(Optional.of(otherBoard));
 
     // then
@@ -300,7 +298,6 @@ public class BoardServiceTest {
     BoardDTO boardDTO = BoardDTO.builder().id("board").build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(boardDTO.getId(), user.getId()))
         .thenThrow(new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
@@ -321,7 +318,6 @@ public class BoardServiceTest {
     Board existingBoard = Board.builder().id("board").user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(existingBoard.getId(), user.getId())).thenReturn(Optional.of(existingBoard));
     when(boardRepository.findByNameAndUserId(duplicateName, user.getId())).thenReturn(Optional.of(existingBoard));
 
@@ -343,7 +339,6 @@ public class BoardServiceTest {
     Board board = Board.builder().id("board").name("Existing Name").user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findByIdAndUserId(board.getId(), user.getId())).thenReturn(Optional.of(board));
     when(boardRepository.findByNameAndUserId(updatedName, user.getId())).thenReturn(Optional.empty());
     doThrow(new RuntimeException("Error")).when(boardRepository).save(any(Board.class));
@@ -367,7 +362,6 @@ public class BoardServiceTest {
         BoardInfo.builder().boardId("board").userId(user.getId()).board(board).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findBoardInfoById(board.getId())).thenReturn(Optional.of(boardInfo));
     doNothing().when(boardRepository).deleteById(board.getId());
 
@@ -406,7 +400,6 @@ public class BoardServiceTest {
         BoardInfo.builder().boardId("board").userId(otherUser.getId()).board(board).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findBoardInfoById(board.getId())).thenReturn(Optional.of(boardInfo));
 
     // then
@@ -425,7 +418,6 @@ public class BoardServiceTest {
     Board board = Board.builder().id("board").user(user).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findBoardInfoById(board.getId()))
         .thenThrow(new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
@@ -447,7 +439,6 @@ public class BoardServiceTest {
         BoardInfo.builder().boardId("board").userId(user.getId()).board(board).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(boardRepository.findBoardInfoById(board.getId())).thenReturn(Optional.of(boardInfo));
     doThrow(new EntityOperationException("Board", "delete", HttpStatus.INTERNAL_SERVER_ERROR)).when(boardRepository).deleteById(board.getId());
 

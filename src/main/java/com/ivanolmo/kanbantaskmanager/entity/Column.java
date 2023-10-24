@@ -27,7 +27,7 @@ public class Column {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  @jakarta.persistence.Column
+  @jakarta.persistence.Column(nullable = false)
   private String name;
 
   @CreatedDate
