@@ -15,5 +15,5 @@ public interface SubtaskRepository extends JpaRepository<Subtask, String> {
 
   @Query("SELECT new com.ivanolmo.kanbantaskmanager.dto.SubtaskInfo(st.id, u.id, st) FROM Subtask" +
       " st JOIN st.task t JOIN t.column c JOIN c.board b JOIN b.user u WHERE st.id = :subtaskId")
-  Optional<SubtaskInfo> findSubtaskInfoById(@Param("subtaskID") String subtaskId);
+  Optional<SubtaskInfo> findSubtaskInfoById(@Param("subtaskId") String subtaskId);
 }
