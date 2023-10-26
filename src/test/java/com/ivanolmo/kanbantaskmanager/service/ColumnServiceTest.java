@@ -220,7 +220,6 @@ public class ColumnServiceTest {
         Column.builder().id(existingColumn.getId()).name(columnDTO.getName()).board(board).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(columnRepository.findColumnInfoById(existingColumn.getId())).thenReturn(Optional.of(columnInfo));
     when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.empty());
     when(columnRepository.save(any(Column.class))).thenReturn(updatedColumn);
@@ -332,7 +331,6 @@ public class ColumnServiceTest {
     ColumnInfo columnInfo = ColumnInfo.builder().columnId(column.getId()).userId(user.getId()).column(column).build();
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(columnRepository.findColumnInfoById(column.getId())).thenReturn(Optional.of(columnInfo));
     when(columnRepository.findByNameAndBoardId(columnDTO.getName(), board.getId())).thenReturn(Optional.empty());
     doThrow(new RuntimeException("Error")).when(columnRepository).save(any(Column.class));
@@ -415,7 +413,6 @@ public class ColumnServiceTest {
     String columnId = "column";
 
     // when
-    when(userHelper.getCurrentUser()).thenReturn(user);
     when(columnRepository.findColumnInfoById(columnId)).thenReturn(Optional.empty());
 
     // then
