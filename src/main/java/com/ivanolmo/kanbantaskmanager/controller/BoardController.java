@@ -3,6 +3,7 @@ package com.ivanolmo.kanbantaskmanager.controller;
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.service.BoardService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/boards")
+@RequiredArgsConstructor
 @Slf4j
 public class BoardController {
   private final BoardService boardService;
-
-  public BoardController(BoardService boardService) {
-    this.boardService = boardService;
-  }
 
   @GetMapping
   public ResponseEntity<ApiResponse<List<BoardDTO>>> getAllUserBoards() {

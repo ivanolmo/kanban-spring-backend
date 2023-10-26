@@ -4,6 +4,7 @@ import com.ivanolmo.kanbantaskmanager.dto.ColumnCreationRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.service.ColumnService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/columns")
+@RequiredArgsConstructor
 @Slf4j
 public class ColumnController {
   private final ColumnService columnService;
-
-  public ColumnController(ColumnService columnService) {
-    this.columnService = columnService;
-  }
 
   @PostMapping
   public ResponseEntity<ApiResponse<ColumnDTO>> addColumnToBoard(@Valid @RequestBody ColumnCreationRequestDTO request) {

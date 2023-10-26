@@ -1,12 +1,17 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskInfo;
+import com.ivanolmo.kanbantaskmanager.dto.TaskInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Subtask;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
+import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.SubtaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.SubtaskRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
+import com.ivanolmo.kanbantaskmanager.util.UserHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -14,28 +19,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class SubtaskServiceImpl implements SubtaskService {
   private final SubtaskRepository subtaskRepository;
   private final TaskRepository taskRepository;
   private final SubtaskMapper subtaskMapper;
-
-  public SubtaskServiceImpl(SubtaskRepository subtaskRepository,
-                            TaskRepository taskRepository,
-                            SubtaskMapper subtaskMapper) {
-    this.subtaskRepository = subtaskRepository;
-    this.taskRepository = taskRepository;
-    this.subtaskMapper = subtaskMapper;
-  }
+  private final UserHelper userHelper;
 
   // create subtask
   @Transactional
   public SubtaskDTO addSubtaskToTask(String taskId, SubtaskDTO subtaskDTO) {
-    // get task, throw error if not found
-    Task task = taskRepository.findById(taskId)
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get task and user info
+    TaskInfo taskInfo = taskRepository.findTaskInfoById(taskId)
         .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
-    // if new task title already exists for this column, throw error
+    // check that subtask -> task relation and user id matches
+    if (!taskInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to add a subtask to this task", HttpStatus.FORBIDDEN);
+    }
+
+    Task task = taskInfo.getTask();
+
+    // if new subtask title already exists for this task, throw error
     subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), taskId)
         .ifPresent(existingSubtask -> {
           throw new EntityOperationException("A subtask with that title already exists",
@@ -60,20 +70,24 @@ public class SubtaskServiceImpl implements SubtaskService {
   // update subtask
   @Transactional
   public SubtaskDTO updateSubtask(String id, SubtaskDTO subtaskDTO) {
-    // get subtask by id or else throw exception
-    Subtask subtask = subtaskRepository.findById(id)
+    // Get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get subtask and user info
+    SubtaskInfo subtaskInfo = subtaskRepository.findSubtaskInfoById(id)
         .orElseThrow(() -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
 
-    // get task that this subtask belongs to or else throw exception
-    // an error being thrown here would signify a data integrity issue
-    Task task = subtask.getTask();
-
-    if (task == null) {
-      throw new EntityOperationException("Task", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    // check if subtask info and user id matches
+    if (!subtaskInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to update a subtask in this task", HttpStatus.FORBIDDEN);
     }
 
+    Subtask subtask = subtaskInfo.getSubtask();
+    Task task = subtask.getTask();
+
     // check incoming dto for a title
-    // this check is in place to prevent issues when a user only wants to update one subtask value
+    // update if present
     if (subtaskDTO.getTitle() != null) {
       // check if the new subtask title is the same as any existing subtask title for this task
       subtaskRepository.findByTitleAndTaskId(subtaskDTO.getTitle(), task.getId())
@@ -106,7 +120,20 @@ public class SubtaskServiceImpl implements SubtaskService {
   // delete subtask
   @Transactional
   public void deleteSubtask(String id) {
-    // delete task or throw error if task not found
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get subtask and user info
+    SubtaskInfo subtaskInfo = subtaskRepository.findSubtaskInfoById(id)
+        .orElseThrow(() -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
+
+    // check if subtask info and user id matches
+    if (!subtaskInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to delete a subtask from this task", HttpStatus.FORBIDDEN);
+    }
+
+    // delete subtask or throw error if task not found
     try {
       subtaskRepository.deleteById(id);
     } catch (EmptyResultDataAccessException e) {

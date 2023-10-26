@@ -1,5 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.repository;
 
+import com.ivanolmo.kanbantaskmanager.dto.BoardInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,8 @@ public interface BoardRepository extends JpaRepository<Board, String> {
 
   @Query("SELECT b FROM Board b WHERE LOWER(b.name) = LOWER(:name) AND b.user.id = :userId")
   Optional<Board> findByNameAndUserId(@Param("name") String name, @Param("userId") String userId);
+
+  @Query("SELECT new com.ivanolmo.kanbantaskmanager.dto.BoardInfo(b.id, u.id, b) FROM Board b " +
+      "JOIN b.user u WHERE b.id = :boardId")
+  Optional<BoardInfo> findBoardInfoById(@Param("boardId") String boardId);
 }

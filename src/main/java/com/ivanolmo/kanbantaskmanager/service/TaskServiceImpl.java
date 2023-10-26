@@ -1,41 +1,50 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
+import com.ivanolmo.kanbantaskmanager.dto.ColumnInfo;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.Task;
+import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
 import com.ivanolmo.kanbantaskmanager.mapper.TaskMapper;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.repository.TaskRepository;
+import com.ivanolmo.kanbantaskmanager.util.UserHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class TaskServiceImpl implements TaskService {
   private final TaskRepository taskRepository;
   private final ColumnRepository columnRepository;
   private final TaskMapper taskMapper;
-
-  public TaskServiceImpl(TaskRepository taskRepository,
-                         ColumnRepository columnRepository,
-                         TaskMapper taskMapper) {
-    this.taskRepository = taskRepository;
-    this.columnRepository = columnRepository;
-    this.taskMapper = taskMapper;
-  }
+  private final UserHelper userHelper;
 
   // create task
   @Transactional
   public TaskDTO addTaskToColumn(String columnId, TaskDTO taskDTO) {
-    // get column, throw error if not found
-    Column column = columnRepository.findById(columnId)
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get column and user info
+    ColumnInfo columnInfo = columnRepository.findColumnInfoById(columnId)
         .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
 
-    // if new task title already exists for this column, throw error
+    // check that task -> column relation and user id matches
+    if (!columnInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to add a task to this column", HttpStatus.FORBIDDEN);
+    }
+
+    Column column = columnInfo.getColumn();
+
+    // check if new task title matches an existing title
     taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), columnId)
         .ifPresent(existingTask -> {
           throw new EntityOperationException("A task with that title already exists",
@@ -60,23 +69,26 @@ public class TaskServiceImpl implements TaskService {
   // update task
   @Transactional
   public TaskDTO updateTask(String id, TaskDTO taskDTO) {
-    // get task by id or else throw exception
-    Task task = taskRepository.findById(id)
+    // Get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get task and user info
+    TaskInfo taskInfo = taskRepository.findTaskInfoById(id)
         .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
 
-    // get column that this task belongs to or else throw exception
-    // an error being thrown here would signify a data integrity issue
-    Column column = task.getColumn();
-
-    if (column == null) {
-      throw new EntityOperationException("Column", "read", HttpStatus.INTERNAL_SERVER_ERROR);
+    // check if task info and user id matches
+    if (!taskInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to update a task in this column", HttpStatus.FORBIDDEN);
     }
 
+    Task task = taskInfo.getTask();
+    Column column = task.getColumn();
+
     // check incoming dto for a title
-    // this check is in place to prevent issues when a user only wants to update one task value
+    // update if present
     if (taskDTO.getTitle() != null) {
       // check if the new task title is the same as any existing task title for this column
-      // if match is found throw exception
       taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), column.getId())
           .ifPresent(existingTask -> {
             throw new EntityOperationException("A task with that title already exists",
@@ -107,13 +119,22 @@ public class TaskServiceImpl implements TaskService {
   // delete task
   @Transactional
   public void deleteTask(String id) {
+    // get user from security context via helper method
+    User user = userHelper.getCurrentUser();
+
+    // get task and user info
+    TaskInfo taskInfo = taskRepository.findTaskInfoById(id)
+        .orElseThrow(() -> new EntityOperationException("Task", "read", HttpStatus.NOT_FOUND));
+
+    // check if task info and user id matches
+    if (!taskInfo.getUserId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to delete a task from this column", HttpStatus.FORBIDDEN);
+    }
+
     // delete task or throw error if task not found
     try {
       taskRepository.deleteById(id);
-    } catch (EmptyResultDataAccessException e) {
-      log.error("An error occurred while deleting task id '{}': {}",
-          id, e.getMessage());
-      throw new EntityOperationException("Task", "delete", HttpStatus.NOT_FOUND);
     } catch (Exception e) {
       log.error("An error occurred while deleting task id '{}': {}",
           id, e.getMessage());
