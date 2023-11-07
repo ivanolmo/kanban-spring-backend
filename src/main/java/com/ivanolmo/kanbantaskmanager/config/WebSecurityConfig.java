@@ -30,16 +30,22 @@ public class WebSecurityConfig {
   private final AuthenticationProvider authenticationProvider;
   private final JwtAuthFilter jwtAuthenticationFilter;
 
+  private static final String[] AUTH_WHITELIST = {
+      "/api/auth/**",
+      "/v3/api-docs/**",
+      "/swagger-ui/**"
+  };
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(antMatcher("/api/auth/**"))
-            .permitAll()
-            .anyRequest()
-            .authenticated()
-        )
+        .authorizeHttpRequests(auth -> {
+          for (String endpoint : AUTH_WHITELIST) {
+            auth.requestMatchers(antMatcher(endpoint)).permitAll();
+          }
+          auth.anyRequest().authenticated();
+        })
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -54,7 +60,6 @@ public class WebSecurityConfig {
 
     config.setAllowCredentials(true);
     config.addAllowedOrigin("http://localhost:3000");
-//    config.setAllowedOrigins(List.of("*"));
     config.setAllowedMethods(Arrays.asList(
         HttpMethod.GET.name(),
         HttpMethod.POST.name(),
