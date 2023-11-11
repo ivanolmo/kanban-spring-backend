@@ -1,6 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.ColumnInfo;
+import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.dto.TaskInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
@@ -17,12 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TaskServiceImpl implements TaskService {
   private final TaskRepository taskRepository;
   private final ColumnRepository columnRepository;
+  private final SubtaskService subtaskService;
   private final TaskMapper taskMapper;
   private final UserHelper userHelper;
 
@@ -85,30 +89,37 @@ public class TaskServiceImpl implements TaskService {
     Task task = taskInfo.getTask();
     Column column = task.getColumn();
 
-    // check incoming dto for a title
-    // update if present
-    if (taskDTO.getTitle() != null) {
-      // check if the new task title is the same as any existing task title for this column
-      taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), column.getId())
-          .ifPresent(existingTask -> {
-            throw new EntityOperationException("A task with that title already exists",
-                HttpStatus.CONFLICT);
-          });
+    // handle column change
+    if (!taskDTO.getColumnId().equals(column.getId())) {
+      Column newColumn = columnRepository.findById(taskDTO.getColumnId())
+          .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
+      task.setColumn(newColumn);
+    }
 
-      // update the title
+    // update task title after checking for duplicates in the same column
+    if (!taskDTO.getTitle().equals(task.getTitle())) {
+      taskRepository.findByTitleAndColumnId(taskDTO.getTitle(), task.getColumn().getId())
+          .ifPresent(existingTask -> {
+            throw new EntityOperationException("A task with that title already exists", HttpStatus.CONFLICT);
+          });
       task.setTitle(taskDTO.getTitle());
     }
 
-    // check incoming dto for a description
-    // update if present
-    if (taskDTO.getDescription() != null) {
-      task.setDescription(taskDTO.getDescription());
-    }
+    // update description
+    task.setDescription(taskDTO.getDescription());
+
+    // update subtasks and get the updated subtask DTOs
+    List<SubtaskDTO> updatedSubtaskDTOs = subtaskService.updateSubtasks(id, taskDTO.getSubtasks());
+
+    // save the task after subtask updates
+    Task updatedTask = taskRepository.save(task);
 
     // perform update and return dto
     try {
-      Task updatedTask = taskRepository.save(task);
-      return taskMapper.toDTO(updatedTask);
+      // create and return the updated TaskDTO
+      TaskDTO updatedTaskDTO = taskMapper.toDTO(updatedTask);
+      updatedTaskDTO.setSubtasks(updatedSubtaskDTOs);
+      return updatedTaskDTO;
     } catch (Exception e) {
       log.error("An error occurred while updating task '{}': {}",
           taskDTO.getTitle(), e.getMessage());
