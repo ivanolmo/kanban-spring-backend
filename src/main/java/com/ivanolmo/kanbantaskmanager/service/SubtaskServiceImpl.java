@@ -91,6 +91,11 @@ public class SubtaskServiceImpl implements SubtaskService {
     Subtask subtaskToToggle = subtaskRepository.findById(id).orElseThrow(
         () -> new EntityOperationException("Subtask", "read", HttpStatus.NOT_FOUND));
 
+    if (!subtaskToToggle.getTask().getColumn().getBoard().getUser().getId().equals(user.getId())) {
+      throw new EntityOperationException(
+          "You do not have permission to update this subtask", HttpStatus.FORBIDDEN);
+    }
+
     subtaskToToggle.setCompleted(!subtaskToToggle.getCompleted());
 
     try {
