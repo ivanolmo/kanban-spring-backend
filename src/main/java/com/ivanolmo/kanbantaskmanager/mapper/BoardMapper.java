@@ -48,6 +48,7 @@ public class BoardMapper {
           return new ColumnDTO(
               column.getId(),
               column.getName(),
+              column.getColor(),
               tasks
           );
         })

@@ -1,6 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,10 @@ public class ColumnDTO {
   @NotBlank(message = "Column name cannot be blank")
   @Size(min = 3, max = 50, message = "Column name should be between 3 and 50 characters")
   private String name;
+
+  @NotBlank(message = "Column color cannot be blank")
+  @Pattern(regexp = "^#(?:[0-9a-fA-F]{3}){1,2}$", message = "Invalid column color code")
+  private String color;
 
   private List<TaskDTO> tasks;
 }

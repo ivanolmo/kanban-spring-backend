@@ -73,6 +73,7 @@ public class Board {
           .map(columnDTO -> Column
               .builder()
               .name(columnDTO.getName())
+              .color(columnDTO.getColor())
               .board(board)
               .build()).toList();
 
