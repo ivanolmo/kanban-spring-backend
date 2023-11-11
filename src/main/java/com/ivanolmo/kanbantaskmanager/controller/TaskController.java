@@ -1,6 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.controller;
 
-import com.ivanolmo.kanbantaskmanager.dto.TaskCreationRequestDTO;
+import com.ivanolmo.kanbantaskmanager.dto.TaskRequestDTO;
 import com.ivanolmo.kanbantaskmanager.dto.TaskDTO;
 import com.ivanolmo.kanbantaskmanager.service.TaskService;
 import jakarta.validation.Valid;
@@ -11,29 +11,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/tasks")
 @RequiredArgsConstructor
 @Slf4j
 public class TaskController {
   private final TaskService taskService;
 
   @PostMapping
-  public ResponseEntity<ApiResponse<TaskDTO>> addTaskToColumn(@Valid @RequestBody TaskCreationRequestDTO request) {
+  public ResponseEntity<ApiResponse<TaskDTO>> addTaskToColumn(@Valid @RequestBody TaskRequestDTO request) {
     TaskDTO newTaskDTO = taskService.addTaskToColumn(request.getColumnId(), request.getTask());
 
     log.info("Successfully added a new task to column with id: {}", request.getColumnId());
-    return ApiResponseUtil.buildSuccessResponse(
-        newTaskDTO, "Successfully created the task", HttpStatus.CREATED);
+    return ApiResponseUtil.buildSuccessResponse(newTaskDTO, "Successfully created the task", HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<TaskDTO>> updateTask(@Valid @RequestBody TaskDTO taskDTO,
-                                            @PathVariable String id) {
-    TaskDTO updatedTaskDTO = taskService.updateTask(id, taskDTO);
+  public ResponseEntity<ApiResponse<TaskDTO>> updateTask(@Valid @RequestBody TaskRequestDTO request,
+                                                         @PathVariable String id) {
+    TaskDTO updatedTaskDTO = taskService.updateTask(id, request.getTask());
 
     log.info("Successfully updated the task with id: {}", id);
-    return ApiResponseUtil.buildSuccessResponse(
-        updatedTaskDTO, "Successfully updated the task", HttpStatus.OK);
+    return ApiResponseUtil.buildSuccessResponse(updatedTaskDTO, "Successfully updated the task", HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
