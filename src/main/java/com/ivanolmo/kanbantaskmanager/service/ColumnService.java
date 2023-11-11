@@ -2,10 +2,8 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 
+import java.util.List;
+
 public interface ColumnService {
-  ColumnDTO addColumnToBoard(String boardId, ColumnDTO columnDTO);
-
-  ColumnDTO updateColumnName(String id, ColumnDTO columnDTO);
-
-  void deleteColumn(String id);
+  List<ColumnDTO> updateColumns(String boardId, List<ColumnDTO> columnDTOs);
 }
