@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/boards")
+@RequestMapping("/boards")
 @RequiredArgsConstructor
 @Slf4j
 public class BoardController {
@@ -27,15 +27,6 @@ public class BoardController {
         boards, "Successfully retrieved all boards for the user", HttpStatus.OK);
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<BoardDTO>> getBoardById(@PathVariable String id) {
-    BoardDTO board = boardService.getBoardById(id);
-
-    log.info("Successfully retrieved the board with id: {}", id);
-    return ApiResponseUtil.buildSuccessResponse(
-        board, "Successfully retrieved the board by id", HttpStatus.OK);
-  }
-
   @PostMapping
   public ResponseEntity<ApiResponse<BoardDTO>> addBoardToUser(@Valid @RequestBody BoardDTO boardDTO) {
     BoardDTO newBoardDTO = boardService.addBoardToUser(boardDTO);
@@ -46,9 +37,9 @@ public class BoardController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<BoardDTO>> updateBoardName(@Valid @RequestBody String newName,
-                                                               @PathVariable String id) {
-    BoardDTO updatedBoardDTO = boardService.updateBoardName(id, newName);
+  public ResponseEntity<ApiResponse<BoardDTO>> updateBoard(@Valid @RequestBody BoardDTO boardDTO,
+                                                           @PathVariable String id) {
+    BoardDTO updatedBoardDTO = boardService.updateBoard(id, boardDTO);
 
     log.info("Successfully updated the board with id: {}", id);
     return ApiResponseUtil.buildSuccessResponse(
