@@ -33,6 +33,7 @@ public class TaskMapper {
         .title(task.getTitle())
         .description(task.getDescription())
         .subtasks(subtasks)
+        .columnId(task.getColumn().getId())
         .build();
   }
 

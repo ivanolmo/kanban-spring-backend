@@ -21,4 +21,6 @@ public class TaskDTO {
   private String description;
 
   private List<SubtaskDTO> subtasks;
+
+  private String columnId;
 }
