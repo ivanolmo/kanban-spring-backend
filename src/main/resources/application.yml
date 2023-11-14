@@ -1,6 +1,7 @@
 logging:
   level:
     root: INFO
-server:
-  servlet:
-    context-path: /api/v1
+spring:
+  mvc:
+    servlet:
+      path: /api/v1
