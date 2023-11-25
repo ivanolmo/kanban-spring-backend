@@ -44,12 +44,11 @@ public class SubtaskServiceTest {
   private UserHelper userHelper;
   @Autowired
   private SubtaskService subtaskService;
-  private User user;
 
   @BeforeEach
   public void setUp() {
     String username = "user@example.com";
-    user = User.builder().id("user").email(username).build();
+    User user = User.builder().id("user").email(username).build();
 
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     Authentication authentication = Mockito.mock(Authentication.class);

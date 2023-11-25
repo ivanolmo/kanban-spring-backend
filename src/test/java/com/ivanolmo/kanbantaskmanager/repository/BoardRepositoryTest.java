@@ -44,7 +44,8 @@ public class BoardRepositoryTest {
 
   @Test
   public void testFindAllByUserId() {
-    List<Board> boards = boardRepository.findAllByUserId(user.getId()).orElse(Collections.emptyList());
+    List<Board> boards =
+        boardRepository.findAllByUserId(user.getId()).orElse(Collections.emptyList());
     assertEquals(2, boards.size(), "Found board size should equal persisted boards");
   }
 
@@ -52,8 +53,8 @@ public class BoardRepositoryTest {
   public void testFindByIdAndUserId() {
     Optional<Board> foundBoard = boardRepository.findByIdAndUserId(board1.getId(), user.getId());
     assertTrue(foundBoard.isPresent(), "Board should be found");
-    assertEquals(board1.getId(), foundBoard.get().getId(), "Found board id should match persisted" +
-        " board id");
+    assertEquals(board1.getId(), foundBoard.get().getId(),
+        "Found board id should match persisted" + " board id");
   }
 
   @Test
@@ -65,7 +66,7 @@ public class BoardRepositoryTest {
   @Test
   public void testDeleteByIdAndUserId() {
     boardRepository.deleteByIdAndUserId(board1.getId(), user.getId());
-    entityManager.flush();  // Ensure delete operation is completed
+    entityManager.flush(); // Ensure delete operation is completed
     Optional<Board> foundBoard = boardRepository.findByIdAndUserId(board1.getId(), user.getId());
     assertFalse(foundBoard.isPresent(), "Board should be deleted");
   }

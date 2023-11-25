@@ -19,16 +19,4 @@ public class SubtaskMapper {
         .updatedAt(subtask.getUpdatedAt())
         .build();
   }
-
-  public Subtask toEntity(SubtaskDTO subtaskDTO) {
-    if (subtaskDTO == null) {
-      return null;
-    }
-
-    return new Subtask.Builder()
-        .id(subtaskDTO.getId())
-        .title(subtaskDTO.getTitle())
-        .completed(subtaskDTO.getCompleted())
-        .build();
-  }
 }

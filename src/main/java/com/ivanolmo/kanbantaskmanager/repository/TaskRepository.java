@@ -14,6 +14,6 @@ public interface TaskRepository extends JpaRepository<Task, String> {
                                         @Param("columnId") String columnId);
 
   @Query("SELECT new com.ivanolmo.kanbantaskmanager.dto.TaskInfo(t.id, u.id, t) FROM Task t " +
-    "JOIN t.column c JOIN c.board b JOIN b.user u WHERE t.id = :taskId")
+      "JOIN t.column c JOIN c.board b JOIN b.user u WHERE t.id = :taskId")
   Optional<TaskInfo> findTaskInfoById(@Param("taskId") String taskId);
 }

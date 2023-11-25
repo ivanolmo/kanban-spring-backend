@@ -41,8 +41,6 @@ public class TaskServiceTest {
   private TaskMapper taskMapper;
   @MockBean
   private UserHelper userHelper;
-  @MockBean
-  private SubtaskService subtaskService;
   @Autowired
   private TaskService taskService;
   private User user;

@@ -28,15 +28,14 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-  private final AuthenticationProvider authenticationProvider;
-  private final JwtAuthFilter jwtAuthenticationFilter;
-
   private static final String[] AUTH_WHITELIST = {
       "/api/v1/auth/**",
       "/api/v1/v3/api-docs/**",
       "/api/v1/swagger-ui/**",
       "/h2-console/**"
   };
+  private final AuthenticationProvider authenticationProvider;
+  private final JwtAuthFilter jwtAuthenticationFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

@@ -4,7 +4,6 @@ import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
-import com.ivanolmo.kanbantaskmanager.mapper.ColumnMapper;
 import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.util.UserHelper;
@@ -34,8 +33,6 @@ public class ColumnServiceTest {
   private ColumnRepository columnRepository;
   @MockBean
   private BoardRepository boardRepository;
-  @MockBean
-  private ColumnMapper columnMapper;
   @MockBean
   private UserHelper userHelper;
   @Autowired
