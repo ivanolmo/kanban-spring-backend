@@ -15,6 +15,8 @@ public class SubtaskMapper {
         .id(subtask.getId())
         .title(subtask.getTitle())
         .completed(subtask.getCompleted())
+        .createdAt(subtask.getCreatedAt())
+        .updatedAt(subtask.getUpdatedAt())
         .build();
   }
 

@@ -45,10 +45,13 @@ public class BoardMapper {
                 taskDTO.setSubtasks(subtasks);
                 return taskDTO;
               }).toList();
+
           return new ColumnDTO(
               column.getId(),
               column.getName(),
               column.getColor(),
+              column.getCreatedAt(),
+              column.getUpdatedAt(),
               tasks
           );
         })
@@ -57,6 +60,8 @@ public class BoardMapper {
     return BoardDTO.builder()
         .id(board.getId())
         .name(board.getName())
+        .createdAt(board.getCreatedAt())
+        .updatedAt(board.getUpdatedAt())
         .columns(columns)
         .build();
   }

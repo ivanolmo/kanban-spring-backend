@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,6 +20,10 @@ public class BoardDTO {
   @NotBlank(message = "Board name cannot be blank")
   @Size(min = 3, max = 50, message = "Board name should be between 3 and 50 characters")
   private String name;
+
+  private LocalDateTime createdAt;
+
+  private LocalDateTime updatedAt;
 
   private List<ColumnDTO> columns;
 }

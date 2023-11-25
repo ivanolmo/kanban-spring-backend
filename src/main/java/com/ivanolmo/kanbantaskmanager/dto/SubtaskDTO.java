@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +20,8 @@ public class SubtaskDTO {
 
   @Builder.Default
   private Boolean completed = Boolean.FALSE;
+
+  private LocalDateTime createdAt;
+
+  private LocalDateTime updatedAt;
 }

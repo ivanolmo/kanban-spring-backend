@@ -32,6 +32,8 @@ public class TaskMapper {
         .id(task.getId())
         .title(task.getTitle())
         .description(task.getDescription())
+        .createdAt(task.getCreatedAt())
+        .updatedAt(task.getUpdatedAt())
         .subtasks(subtasks)
         .columnId(task.getColumn().getId())
         .build();
