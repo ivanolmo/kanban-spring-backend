@@ -111,11 +111,11 @@ public class TaskServiceImpl implements TaskService {
     // update subtasks and get the updated subtask DTOs
     List<SubtaskDTO> updatedSubtaskDTOs = subtaskService.updateSubtasks(id, taskDTO.getSubtasks());
 
-    // save the task after subtask updates
-    Task updatedTask = taskRepository.save(task);
-
     // perform update and return dto
     try {
+      // save the task after subtask updates
+      Task updatedTask = taskRepository.save(task);
+
       // create and return the updated TaskDTO
       TaskDTO updatedTaskDTO = taskMapper.toDTO(updatedTask);
       updatedTaskDTO.setSubtasks(updatedSubtaskDTOs);
