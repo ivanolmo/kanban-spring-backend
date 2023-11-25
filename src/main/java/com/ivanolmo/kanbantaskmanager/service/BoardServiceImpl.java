@@ -2,6 +2,7 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.BoardDTO;
 import com.ivanolmo.kanbantaskmanager.dto.BoardInfo;
+import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.User;
 import com.ivanolmo.kanbantaskmanager.exception.EntityOperationException;
@@ -23,6 +24,7 @@ import java.util.List;
 public class BoardServiceImpl implements BoardService {
   private final BoardRepository boardRepository;
   private final BoardMapper boardMapper;
+  private final ColumnService columnService;
   private final UserHelper userHelper;
 
   // get all boards for a user
@@ -39,19 +41,6 @@ public class BoardServiceImpl implements BoardService {
     return boards.stream()
         .map(boardMapper::toDTO)
         .toList();
-  }
-
-  @Transactional(readOnly = true)
-  public BoardDTO getBoardById(String boardId) {
-    // get user from security context via helper method
-    User user = userHelper.getCurrentUser();
-
-    // get user board
-    Board board = boardRepository.findByIdAndUserId(boardId, user.getId())
-        .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
-
-    // map board to DTO and return
-    return boardMapper.toDTO(board);
   }
 
   @Transactional
@@ -83,7 +72,7 @@ public class BoardServiceImpl implements BoardService {
 
   // update board
   @Transactional
-  public BoardDTO updateBoardName(String id, String newName) {
+  public BoardDTO updateBoard(String id, BoardDTO boardDTO) {
     // get user from security context via helper method
     User user = userHelper.getCurrentUser();
 
@@ -91,27 +80,39 @@ public class BoardServiceImpl implements BoardService {
     Board board = boardRepository.findByIdAndUserId(id, user.getId())
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
-    // check that the board -> user relation matches
+    // check if board exists and belongs to the current user
     if (!board.getUser().getId().equals(user.getId())) {
       throw new EntityOperationException("You do not have permission to update this board",
           HttpStatus.FORBIDDEN);
     }
 
-    // check if board name already exists for this user
-    boardRepository.findByNameAndUserId(newName, user.getId())
+    // check if board name already exists but exclude current board
+    boardRepository.findByNameAndUserId(boardDTO.getName(), user.getId())
+        .filter(existingBoard -> !existingBoard.getId().equals(id))
         .ifPresent(existingBoard -> {
           throw new EntityOperationException("A board with that name already exists",
               HttpStatus.CONFLICT);
         });
 
-    // update board and return dto
+    // update board name
+    board.setName(boardDTO.getName());
+
+    // update columns and get the updated column DTOs
+    List<ColumnDTO> updatedColumnDTOs = columnService.updateColumns(id, boardDTO.getColumns());
+
     try {
-      board.setName(newName);
+      // save the board after column updates
       Board updatedBoard = boardRepository.save(board);
-      return boardMapper.toDTO(updatedBoard);
+
+      // create and return the updated BoardDTO
+      BoardDTO updatedBoardDTO = boardMapper.toDTO(updatedBoard);
+
+      // Set updated columns in DTO
+      updatedBoardDTO.setColumns(updatedColumnDTOs);
+      return updatedBoardDTO;
     } catch (Exception e) {
-      log.error("An error occurred while updating board '{}' with new name '{}': {}",
-          board.getName(), newName, e.getMessage());
+      log.error("An error occurred while updating board '{}': {}",
+          board.getName(), e.getMessage());
       throw new EntityOperationException("Board", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

@@ -5,6 +5,7 @@ import com.ivanolmo.kanbantaskmanager.dto.auth.AuthResponseDTO;
 
 public interface AuthService {
   AuthResponseDTO register(AuthRequestDTO request);
+
   AuthResponseDTO login(AuthRequestDTO request);
 
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskCreationRequestDTO {
+public class TaskRequestDTO {
   @Valid
   private TaskDTO task;
   private String columnId;

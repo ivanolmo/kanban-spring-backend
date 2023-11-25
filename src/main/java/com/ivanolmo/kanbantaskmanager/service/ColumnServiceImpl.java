@@ -1,8 +1,6 @@
 package com.ivanolmo.kanbantaskmanager.service;
 
-import com.ivanolmo.kanbantaskmanager.dto.BoardInfo;
 import com.ivanolmo.kanbantaskmanager.dto.ColumnDTO;
-import com.ivanolmo.kanbantaskmanager.dto.ColumnInfo;
 import com.ivanolmo.kanbantaskmanager.entity.Board;
 import com.ivanolmo.kanbantaskmanager.entity.Column;
 import com.ivanolmo.kanbantaskmanager.entity.User;
@@ -12,120 +10,72 @@ import com.ivanolmo.kanbantaskmanager.repository.BoardRepository;
 import com.ivanolmo.kanbantaskmanager.repository.ColumnRepository;
 import com.ivanolmo.kanbantaskmanager.util.UserHelper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ColumnServiceImpl implements ColumnService {
   private final ColumnRepository columnRepository;
   private final BoardRepository boardRepository;
   private final ColumnMapper columnMapper;
   private final UserHelper userHelper;
 
-  // create board column
   @Transactional
-  public ColumnDTO addColumnToBoard(String boardId, ColumnDTO columnDTO) {
+  public List<ColumnDTO> updateColumns(String boardId, List<ColumnDTO> columnDTOs) {
     // get user from security context via helper method
     User user = userHelper.getCurrentUser();
 
-    // get board and user info
-    BoardInfo boardInfo = boardRepository.findBoardInfoById(boardId)
+    // get board by id
+    Board board = boardRepository.findByIdAndUserId(boardId, user.getId())
         .orElseThrow(() -> new EntityOperationException("Board", "read", HttpStatus.NOT_FOUND));
 
-    // check that column -> board relation and user id matches
-    if (!boardInfo.getUserId().equals(user.getId())) {
+    // check if board exists and belongs to the current user
+    if (!board.getUser().getId().equals(user.getId())) {
       throw new EntityOperationException(
-          "You do not have permission to add a column to this board", HttpStatus.FORBIDDEN);
+          "You do not have permission to update columns on this board", HttpStatus.FORBIDDEN);
     }
 
-    Board board = boardInfo.getBoard();
+    // get the existing columns from db and create a map of those columns
+    List<Column> existingColumns =
+        columnRepository.findAllByBoardId(boardId).orElse(Collections.emptyList());
+    Map<String, Column> existingColumnsMap = existingColumns.stream()
+        .collect(Collectors.toMap(Column::getId, Function.identity()));
 
-    // check if new column name matches an existing name
-    columnRepository.findByNameAndBoardId(columnDTO.getName(), boardId)
-        .ifPresent(existingColumn -> {
-          throw new EntityOperationException("A column with that name already exists",
-              HttpStatus.CONFLICT);
-        });
+    // create or update columns based on the provided DTOs
+    List<Column> updatedColumns = columnDTOs.stream()
+        .map(dto -> {
+          Column column = existingColumnsMap.getOrDefault(dto.getId(), new Column());
+          column.setName(dto.getName());
+          column.setColor(dto.getColor());
+          column.setBoard(board);
+          return column;
+        }).toList();
 
-    // convert the ColumnDTO to a Column entity and set to board
-    Column column = columnMapper.toEntity(columnDTO);
-    column.setBoard(board);
+    // save updated columns
+    List<Column> savedColumns = columnRepository.saveAll(updatedColumns);
 
-    // save and return dto, throw error if exception
-    try {
-      column = columnRepository.save(column);
-      return columnMapper.toDTO(column);
-    } catch (Exception e) {
-      log.error("An error occurred while adding column '{}' to board '{}': {}",
-          columnDTO.getName(), board.getName(), e.getMessage());
-      throw new EntityOperationException("Column", "create", e, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+    // get the IDs of the columns that should remain
+    Set<String> dtoIds = columnDTOs.stream()
+        .map(ColumnDTO::getId)
+        .collect(Collectors.toSet());
 
-  // update column
-  @Transactional
-  public ColumnDTO updateColumnName(String id, ColumnDTO columnDTO) {
-    // Get user from security context via helper method
-    User user = userHelper.getCurrentUser();
+    // determine columns to be deleted
+    List<Column> columnsToDelete = existingColumns.stream()
+        .filter(existingColumn -> !dtoIds.contains(existingColumn.getId()))
+        .collect(Collectors.toList());
 
-    // get column and user info
-    ColumnInfo columnInfo = columnRepository.findColumnInfoById(id)
-        .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
+    // delete columns that are not in the updated DTO list
+    columnRepository.deleteAllInBatch(columnsToDelete);
 
-    // check if column info and user id matches
-    if (!columnInfo.getUserId().equals(user.getId())) {
-      throw new EntityOperationException(
-          "You do not have permission to update a column in this board", HttpStatus.FORBIDDEN);
-    }
-
-    Column column = columnInfo.getColumn();
-
-    // check if updated name matches an existing name
-    columnRepository.findByNameAndBoardId(columnDTO.getName(), column.getBoard().getId())
-        .ifPresent(existingColumn -> {
-          throw new EntityOperationException(
-              "A column with that name already exists", HttpStatus.CONFLICT);
-        });
-
-    // update column name and return DTO
-    try {
-      column.setName(columnDTO.getName());
-      Column updatedColumn = columnRepository.save(column);
-      return columnMapper.toDTO(updatedColumn);
-    } catch (Exception e) {
-      log.error(
-          "An error occurred while updating column '{}': {}", columnDTO.getName(), e.getMessage());
-      throw new EntityOperationException("Column", "update", e, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  // delete column
-  @Transactional
-  public void deleteColumn(String id) {
-    // get user from security context via helper method
-    User user = userHelper.getCurrentUser();
-
-    // get column and user info
-    ColumnInfo columnInfo = columnRepository.findColumnInfoById(id)
-        .orElseThrow(() -> new EntityOperationException("Column", "read", HttpStatus.NOT_FOUND));
-
-    // check if column info and user id matches
-    if (!columnInfo.getUserId().equals(user.getId())) {
-      throw new EntityOperationException(
-          "You do not have permission to delete a column from this board", HttpStatus.FORBIDDEN);
-    }
-
-    // delete column
-    try {
-      columnRepository.deleteById(id);
-    } catch (Exception e) {
-      log.error("An error occurred while deleting column id '{}': {}",
-          id, e.getMessage());
-      throw new EntityOperationException("Column", "delete", e, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return savedColumns.stream().map(columnMapper::toDTO).collect(Collectors.toList());
   }
 }

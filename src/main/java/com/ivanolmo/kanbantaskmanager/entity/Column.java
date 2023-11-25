@@ -30,6 +30,9 @@ public class Column {
   @jakarta.persistence.Column(nullable = false)
   private String name;
 
+  @jakarta.persistence.Column(nullable = false, name = "color")
+  private String color;
+
   @CreatedDate
   @jakarta.persistence.Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -60,6 +63,11 @@ public class Column {
 
     public Builder name(String name) {
       column.setName(name);
+      return this;
+    }
+
+    public Builder color(String color) {
+      column.setColor(color);
       return this;
     }
 

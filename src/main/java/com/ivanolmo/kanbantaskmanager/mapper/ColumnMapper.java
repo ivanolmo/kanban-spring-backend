@@ -31,6 +31,7 @@ public class ColumnMapper {
     return ColumnDTO.builder()
         .id(column.getId())
         .name(column.getName())
+        .color(column.getColor())
         .tasks(tasks)
         .build();
   }
@@ -43,6 +44,7 @@ public class ColumnMapper {
     return new Column.Builder()
         .id(columnDTO.getId())
         .name(columnDTO.getName())
+        .color(columnDTO.getColor())
         .tasks(columnDTO.getTasks())
         .build();
   }

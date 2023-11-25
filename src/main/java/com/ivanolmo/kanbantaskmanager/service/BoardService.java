@@ -7,11 +7,9 @@ import java.util.List;
 public interface BoardService {
   List<BoardDTO> getAllUserBoards();
 
-  BoardDTO getBoardById(String id);
-
   BoardDTO addBoardToUser(BoardDTO boardDTO);
 
-  BoardDTO updateBoardName(String id, String newName);
+  BoardDTO updateBoard(String id, BoardDTO boardDTO);
 
   void deleteBoard(String id);
 }

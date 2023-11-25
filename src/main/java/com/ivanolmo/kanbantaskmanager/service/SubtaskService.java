@@ -2,10 +2,10 @@ package com.ivanolmo.kanbantaskmanager.service;
 
 import com.ivanolmo.kanbantaskmanager.dto.SubtaskDTO;
 
+import java.util.List;
+
 public interface SubtaskService {
-  SubtaskDTO addSubtaskToTask(String taskId, SubtaskDTO subtaskDTO);
+  List<SubtaskDTO> updateSubtasks(String taskId, List<SubtaskDTO> subtaskDTO);
 
-  SubtaskDTO updateSubtask(String id, SubtaskDTO subtaskDTO);
-
-  void deleteSubtask(String id);
+  SubtaskDTO toggleSubtaskCompletion(String id);
 }
