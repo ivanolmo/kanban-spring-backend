@@ -1,4 +1,6 @@
 security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
   jwt:
     secret-key: ${JWT_SECRET_KEY_TEST}
     expiration-time: 86400000
