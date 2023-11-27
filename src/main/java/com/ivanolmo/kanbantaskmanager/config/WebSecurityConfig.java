@@ -1,6 +1,7 @@
 package com.ivanolmo.kanbantaskmanager.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,28 +29,26 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-  private static final String[] AUTH_WHITELIST = {
-      "/api/v1/auth/**",
-      "/api/v1/v3/api-docs/**",
-      "/api/v1/swagger-ui/**",
-      "/h2-console/**"
-  };
+  @Value("${security.cors.allowed-origins}")
+  private String allowedOrigins;
+
+  private static final String[] AUTH_WHITELIST = {"/api/v1/auth/**", "/api/v1/actuator/**",
+      "/actuator/**", "/api/v1/v3/api-docs/**", "/api/v1/swagger-ui/**", "/h2-console/**"};
   private final AuthenticationProvider authenticationProvider;
   private final JwtAuthFilter jwtAuthenticationFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .headers(httpSecurityHeadersConfigurer ->
-            httpSecurityHeadersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-        .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> {
+    http.headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer
+            .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+        .csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> {
           for (String endpoint : AUTH_WHITELIST) {
             auth.requestMatchers(antMatcher(endpoint)).permitAll();
           }
           auth.anyRequest().authenticated();
         })
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -62,19 +61,12 @@ public class WebSecurityConfig {
     CorsConfiguration config = new CorsConfiguration();
 
     config.setAllowCredentials(true);
-    config.addAllowedOrigin("http://localhost:3000");
-    config.setAllowedMethods(Arrays.asList(
-        HttpMethod.GET.name(),
-        HttpMethod.POST.name(),
-        HttpMethod.PUT.name(),
-        HttpMethod.DELETE.name(),
-        HttpMethod.OPTIONS.name()
-    ));
-    config.setAllowedHeaders(Arrays.asList(
-        HttpHeaders.ACCEPT,
-        HttpHeaders.AUTHORIZATION,
-        HttpHeaders.CONTENT_TYPE
-    ));
+    config.addAllowedOrigin(allowedOrigins);
+    config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(),
+        HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name()));
+    config.setAllowedHeaders(Arrays.asList(HttpHeaders.ACCEPT, HttpHeaders.AUTHORIZATION,
+        HttpHeaders.CONTENT_TYPE, HttpHeaders.ORIGIN, HttpHeaders.USER_AGENT, HttpHeaders.REFERER,
+        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
     config.setMaxAge(3600L);
     source.registerCorsConfiguration("/**", config);
 

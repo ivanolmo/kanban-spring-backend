@@ -1,4 +1,6 @@
 security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
   jwt:
     secret-key: ${JWT_SECRET_KEY_DEV}
     expiration-time: 86400000
@@ -20,3 +22,8 @@ spring:
 logging:
   level:
     root: info
+management:
+  endpoints:
+    web:
+      exposure:
+        include: 'health'
