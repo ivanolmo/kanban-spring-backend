@@ -74,7 +74,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_IMAGE_URI }}
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_IMAGE_URI }}
             docker pull ${{ secrets.AWS_ECR_IMAGE_URI }}:latest
             docker stop ${{ secrets.CONTAINER_NAME }} || true
             docker run -d -p 80:8080 \
