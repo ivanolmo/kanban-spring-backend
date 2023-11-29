@@ -58,10 +58,11 @@ jobs:
 
       - name: Temporarily add Action runner IP address to EC2 security group inbound rules
         run: |
-          --group-id ${{ secrets.AWS_EC2_SECURITY_GROUP_ID }} \
-          --protocol tcp \
-          --port 22 \
-          --cidr ${{ steps.ip.outputs.ipv4 }}/32
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.AWS_EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
       - name: SSH and Deploy to EC2
         if: github.event_name == 'push'
