@@ -53,10 +53,12 @@ jobs:
         run: docker push ${{ secrets.AWS_ECR_IMAGE_URI }}:latest
 
       - name: Get Action runner IP address
+        if: github.event_name == 'push'
         id: ip
         uses: haythem/public-ip@v1.3
 
       - name: Temporarily add Action runner IP address to EC2 security group inbound rules
+        if: github.event_name == 'push'
         run: |
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ secrets.AWS_EC2_SECURITY_GROUP_ID }} \
@@ -86,6 +88,7 @@ jobs:
               ${{ secrets.AWS_ECR_IMAGE_URI }}:latest
 
       - name: Remove Action runner IP address from EC2 security group inbound rules
+        if: github.event_name == 'push'
         run: |
           aws ec2 revoke-security-group-ingress \
             --group-id ${{ secrets.AWS_EC2_SECURITY_GROUP_ID }} \
