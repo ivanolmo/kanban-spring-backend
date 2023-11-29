@@ -32,6 +32,8 @@ public class ColumnMapper {
         .id(column.getId())
         .name(column.getName())
         .color(column.getColor())
+        .createdAt(column.getCreatedAt())
+        .updatedAt(column.getUpdatedAt())
         .tasks(tasks)
         .build();
   }

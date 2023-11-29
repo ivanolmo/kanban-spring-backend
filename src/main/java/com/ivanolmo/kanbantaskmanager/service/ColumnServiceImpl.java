@@ -47,34 +47,32 @@ public class ColumnServiceImpl implements ColumnService {
     // get the existing columns from db and create a map of those columns
     List<Column> existingColumns =
         columnRepository.findAllByBoardId(boardId).orElse(Collections.emptyList());
-    Map<String, Column> existingColumnsMap = existingColumns.stream()
-        .collect(Collectors.toMap(Column::getId, Function.identity()));
+    Map<String, Column> existingColumnsMap =
+        existingColumns.stream().collect(Collectors.toMap(Column::getId, Function.identity()));
 
     // create or update columns based on the provided DTOs
-    List<Column> updatedColumns = columnDTOs.stream()
-        .map(dto -> {
-          Column column = existingColumnsMap.getOrDefault(dto.getId(), new Column());
-          column.setName(dto.getName());
-          column.setColor(dto.getColor());
-          column.setBoard(board);
-          return column;
-        }).toList();
+    List<Column> updatedColumns = columnDTOs.stream().map(dto -> {
+      Column column = existingColumnsMap.getOrDefault(dto.getId(), new Column());
+      column.setName(dto.getName());
+      column.setColor(dto.getColor());
+      column.setBoard(board);
+      return column;
+    }).toList();
 
     // save updated columns
     List<Column> savedColumns = columnRepository.saveAll(updatedColumns);
 
     // get the IDs of the columns that should remain
-    Set<String> dtoIds = columnDTOs.stream()
-        .map(ColumnDTO::getId)
-        .collect(Collectors.toSet());
+    Set<String> dtoIds = columnDTOs.stream().map(ColumnDTO::getId).collect(Collectors.toSet());
 
     // determine columns to be deleted
-    List<Column> columnsToDelete = existingColumns.stream()
-        .filter(existingColumn -> !dtoIds.contains(existingColumn.getId()))
-        .collect(Collectors.toList());
+    List<Column> columnsToDelete =
+        existingColumns.stream().filter(existingColumn -> !dtoIds.contains(existingColumn.getId()))
+            .collect(Collectors.toList());
 
     // delete columns that are not in the updated DTO list
-    columnRepository.deleteAllInBatch(columnsToDelete);
+    columnRepository.deleteAll(columnsToDelete);
+    columnRepository.flush();
 
     return savedColumns.stream().map(columnMapper::toDTO).collect(Collectors.toList());
   }
