@@ -1,4 +1,4 @@
-![example workflow](https://github.com/ivanolmo/kanban-spring-backend/actions/workflows/build.yml/badge.svg)
+[![Build and Deploy Project to AWS](https://github.com/ivanolmo/kanban-spring-backend/actions/workflows/build.yml/badge.svg)](https://github.com/ivanolmo/kanban-spring-backend/actions/workflows/build.yml)
 
 # Spring Boot, Spring Data, Spring Security, JWT, PostgreSQL Rest API deployed to AWS
 
